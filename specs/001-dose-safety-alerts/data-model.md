@@ -37,8 +37,8 @@ One scheduled intake of a medication on a given day.
 | id | string | `${medicationId}@${date}T${time}` |
 | medicationId | string | → Medication |
 | dueAt | datetime | |
-| windowMinutes | number | **snapshot** of the effective window when the dose was created (edge case: later changes do not affect pending doses) |
-| riskLevel | `"high" \| "low"` | snapshot, as above |
+| windowMinutes | number \| null | **snapshot** of the effective window, taken when the dose leaves `scheduled` (becomes due, or is confirmed early or marked unsure); `null` before that. Settings changed later do not affect it (spec edge case) |
+| riskLevel | `"high" \| "low"` \| null | snapshot, as above |
 | status | DoseStatus | see state machine |
 | confirmations | datetime[] | each "I took it" time; length 2+ means duplicate (FR-009) |
 | unsureAt | datetime \| null | set by "I'm not sure" (FR-007) |
@@ -92,7 +92,7 @@ Alerts are never deleted or withdrawn (FR-015).
 ```text
             reminder shown at dueAt (once)
  scheduled ───────────────────────────────▶ due
-    │  confirm before dueAt (early dose)     │
+    │  confirm ≤ 2 h before dueAt (early)    │
     ▼                                        ├── confirm (inside window) ──────▶ taken
   taken                                      ├── "I'm not sure" ───────────────▶ unsure      [flag: unsure]
                                              └── now ≥ windowClosesAt ────────▶ missed      [flag: missed]
@@ -108,7 +108,14 @@ Alerts are never deleted or withdrawn (FR-015).
 
 **Early dose** (spec edge case, T1:30, T1:32): confirming before `dueAt` applies to the *next*
 due dose of that medication that has no confirmation (for twice-daily medications, the next of the
-two); that dose never shows a reminder.
+two), and is allowed only when `now ≥ dueAt − 120 min`. If the medication's latest confirmation is
+less than 6 hours old, the tap opens the FR-009 three-choice prompt instead of recording. An early
+dose never shows a reminder.
+
+**Confirm after unsure** (spec edge case "unsure then later remembers"): an `unsure` dose with no
+confirmation can still be confirmed with **I took it**, which stays visible; the dose becomes
+`taken` and the unsure flag is kept. An `unsure` dose that already has a confirmation (unsure
+chosen in the FR-009 prompt) opens the FR-009 prompt again.
 
 ## Rules (validation and routing)
 
@@ -122,6 +129,9 @@ two); that dose never shows a reminder.
 | Low-risk flag → routine notice to Harold only | FR-017 |
 | Rachel's view lists only medications with `sharedWithRachel` (name, due time, status) | FR-019, FR-022 |
 | Rachel's view never shows flag reason or details of unshared medications | FR-019, FR-021 |
+| Early confirmation only when `now ≥ dueAt − 120 min` | Spec edge case (team assumption) |
+| Medication confirmed less than 6 h ago → FR-009 prompt, never a silent second record | FR-009 |
+| Window and risk are snapshotted when a dose leaves `scheduled` | FR-010, spec edge case |
 
 ## Seed data (mock)
 

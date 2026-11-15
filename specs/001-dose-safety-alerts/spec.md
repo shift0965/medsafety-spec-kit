@@ -183,9 +183,12 @@ view, then open Rachel's view and check exactly what she can see and receive for
   both the unsure mark and the confirmation time, and the flag stays visible.
 - **Window changed by Dr. Nguyen while a dose is pending**: the new window applies from the next
   due dose; the pending dose keeps the window it started with.
-- **Dose confirmed before the due time** (e.g. taken early before an appointment, T1:30):
-  recorded with the actual time; it counts as the next due dose of that medication (some are
-  taken twice a day, T1:32), and no reminder is shown for that dose.
+- **Dose confirmed before the due time** (e.g. taken early before an appointment, T1:30): allowed
+  only within 2 hours before the next due time (team assumption). It is recorded with the actual
+  time, counts as that next due dose (some medications are taken twice a day, T1:32), and no
+  reminder is shown for that dose. If the medication was confirmed less than 6 hours ago, the tap
+  shows the FR-009 prompt instead (team assumption). Outside the 2-hour lead time, the card shows
+  the next due time and no confirm button.
 - **Rachel is safety contact and the medication is also shared**: she gets the "please check in"
   message on a high-risk flag and can see that medication's status in her view.
 - **Medication not shared but flagged low-risk**: Rachel sees and receives nothing.
@@ -202,8 +205,8 @@ Each requirement lists its goal model reference and interview evidence (Constitu
   neutral, non-alarming wording, and MUST NOT repeat it. *(G-4; T1:48; F1:6, F1:12)*
 - **FR-002**: System MUST remove the reminder as soon as the dose is confirmed or marked unsure.
   *(G-4, merged HW2 G-32; F1:6)*
-- **FR-003**: Harold MUST be able to confirm a due dose with a single tap. *(G-7; T1:14; F1:37;
-  F2:36)*
+- **FR-003**: Harold MUST be able to confirm a due dose with a single tap; a dose may be confirmed
+  up to 2 hours before its due time (team assumption; T1:30). *(G-7; T1:14, T1:30; F1:37; F2:36)*
 - **FR-004**: System MUST store the time each dose is confirmed. *(G-8; F1:37; T2:17)*
 - **FR-005**: System MUST show, for each medication, the date and time it was last taken.
   *(G-17; T1:44)*
@@ -217,9 +220,10 @@ Each requirement lists its goal model reference and interview evidence (Constitu
 - **FR-008**: After an "unsure" mark, System MUST show the last-taken time for that medication
   and advise Harold to wait until it is checked before taking another dose. *(G-43, G-17,
   supports G-20; T1:44; F2:22)*
-- **FR-009**: When Harold tries to confirm a dose that is already recorded for that due time,
-  System MUST show the existing record's time and offer three choices: "Yes, I took another"
-  (records a second dose), "No, I tapped by mistake" (records nothing) and "I'm not sure"
+- **FR-009**: When Harold tries to confirm a dose that is already recorded for that due time, or
+  a medication that was confirmed less than 6 hours ago (team assumption), System MUST show the
+  existing record's time and offer three choices: "Yes, I took another"
+  (records a duplicate of the most recent dose, at the current time), "No, I tapped by mistake" (records nothing) and "I'm not sure"
   (marks the dose unsure, FR-007). *(G-22, G-17, supports G-16; T2:14, T2:17)*
 
 **Medication settings**
@@ -227,9 +231,9 @@ Each requirement lists its goal model reference and interview evidence (Constitu
 - **FR-010**: Dr. Nguyen MUST be able to set, per medication, a window (minutes after due time)
   and a risk level of high or low. *(G-38; T3:39, T3:59, T3:70)*
 - **FR-011**: Medications without settings MUST use a default of a 60-minute window and high
-  risk, and the default MUST be visibly indicated in Dr. Nguyen's view. *(G-38; team
-  assumption, no transcript evidence: an unset medication is treated as high risk so that a
-  setup gap over-alerts rather than missing a dangerous dose)*
+  risk, and the default MUST be visibly indicated in Dr. Nguyen's view. *(G-38; T3:59 for each
+  medication needing a risk level; "default = high" is a team decision, so that a setup gap
+  over-alerts rather than missing a dangerous dose)*
 
 **Flagging**
 

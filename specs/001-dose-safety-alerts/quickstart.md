@@ -43,12 +43,17 @@ Each step lists the spec scenario it proves. Record results in `docs/traceabilit
    unsure and flagged immediately (Metoprolol uses the default high risk, so urgent alerts). → US2-5
 7. Reset. Advance to 07:00, tap **I'm not sure** on Levothyroxine → last-taken shown and "please
    wait" advice; routine notice only (low risk). → US2-1, US4-3
+   7a. **I took it** is still shown on Levothyroxine; tap it → status taken, the unsure flag stays
+   visible. → edge case "unsure then later remembers"
 
 ### C. Settings (US3)
 
 8. In Dr. Nguyen's view, Metoprolol shows a "default" badge (60 min, high). → US3-3
 9. Set Levothyroxine to 30 min / low and Warfarin to high; values are saved and shown. → US3-1,
    US3-2
+   9a. Reset. Before 08:00, set Warfarin's window to 90 min; advance to 08:00, then set it to
+   30 min. Advance to 09:15: no Warfarin flag, because today's dose kept the 90-min window it had
+   when it became due (it closes at 09:30). → edge case "window changed while a dose is pending"
 
 ### D. Windows and urgency (US4)
 
@@ -61,8 +66,13 @@ Each step lists the spec scenario it proves. Record results in `docs/traceabilit
     dose" appears first, with no dosing advice. → US4-5
 13. Tap **Record that I took it**: status "taken late 09:15"; flag and alerts still present. → US4-6
 14. Advance to 22:00 without confirming Atorvastatin: routine notice to Harold only. → US4-3
-15. Reset. At 18:00 tap **I took it** on Atorvastatin (early dose). Advance to 20:00: no
-    reminder for Atorvastatin; last taken shows 18:00. → edge case "dose confirmed before due time"
+15. Reset. At 17:30 Atorvastatin shows no **I took it** button (more than 2 h early). At 18:00
+    tap **I took it** on Atorvastatin (early dose). Advance to 20:00: no reminder for Atorvastatin;
+    last taken shows 18:00. → edge case "dose confirmed before due time"
+    15a. Reset. Advance to 15:00 (Metoprolol 08:00 missed), tap **I took it**, then **Record that
+    I took it**: "taken late 15:00".
+    Advance to 18:30 and tap **I took it** on Metoprolol: the duplicate dialog opens instead of
+    recording, because the last confirmation was less than 6 h ago. → FR-009, edge case
 
 ### E. Rachel's access (US5)
 
@@ -83,6 +93,6 @@ the rule-based acceptance scenarios (US2, US4, US5). All must pass before taggin
 
 ## Deploy
 
-Build `frontend/` and deploy `frontend/dist` as a static site (research R9). Create one
-deployment from the `v1` tag and, later, a separate one from `v2`; record both URLs in
-`README.md`.
+Build `frontend/` and deploy `frontend/dist` as a static site (research R9). Record the URL in
+`README.md`, repeat this walkthrough against the deployed URL, and only then tag `v1`. Later,
+create a separate deployment for `v2` and record its URL too.

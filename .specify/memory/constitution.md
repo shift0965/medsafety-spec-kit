@@ -1,5 +1,13 @@
 <!--
 Sync Impact Report
+- Version change: 1.0.0 → 1.0.1 (PATCH, 2026-11-14)
+- Modified: Principle V large-print bullet clarified ("confirm a due dose with a single tap");
+  safety prompts for repeated doses (FR-009) and missed high-risk doses (FR-015) explicitly
+  allowed. No principle added, removed or redefined.
+- Templates: none modified
+- Deferred TODOs: none
+
+Previous report (1.0.0)
 - Version change: (unversioned template) → 1.0.0
 - Modified principles (all newly defined from template placeholders):
   - [PRINCIPLE_1_NAME] → I. Stakeholder Traceability (NON-NEGOTIABLE)
@@ -82,8 +90,9 @@ remains the source of truth.
   notifications (SMS/email/push), or external health-record integrations.
 - Prototypes MUST be deployable as a static/front-end application from `frontend/` so V1 and V2
   can be hosted at separate, persistent URLs.
-- Harold's views MUST use large text and large tap targets (G-36) and confirm a dose with a
-  single tap (G-7).
+- Harold's views MUST use large text and large tap targets (G-36) and confirm a due dose with a
+  single tap (G-7). Safety prompts for repeated doses (FR-009) and missed high-risk doses
+  (FR-015) are allowed.
 - Complexity (backends, auth providers, frameworks beyond what the scope needs) MUST be
   justified in the plan's complexity tracking; otherwise the simplest option wins.
 
@@ -130,4 +139,4 @@ prototypes keep effort on stakeholder goals.
 - Compliance is reviewed at each Spec Kit gate (plan Constitution Check, `/speckit-analyze`)
   and before tagging V1 and V2. Violations MUST be fixed or explicitly justified in the plan.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-14 | **Last Amended**: 2026-11-14
+**Version**: 1.0.1 | **Ratified**: 2026-11-14 | **Last Amended**: 2026-11-14

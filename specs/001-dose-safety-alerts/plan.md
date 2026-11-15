@@ -1,6 +1,6 @@
 # Implementation Plan: Dose Confirmation and Risk-Based Missed/Duplicate-Dose Alerts
 
-**Branch**: `001-dose-safety-alerts` | **Date**: 2026-11-14 | **Spec**: [spec.md](./spec.md)
+**Branch**: `main` (spec folder `001-dose-safety-alerts`) | **Date**: 2026-11-14 | **Spec**: [spec.md](./spec.md)
 
 **Input**: Feature specification from `specs/001-dose-safety-alerts/spec.md`
 
@@ -9,8 +9,9 @@
 Build Prototype V1 of the remind → confirm → record → flag → alert safety loop for Harold
 (G-4, G-7, G-8, G-17, G-43, G-38, G-22, G-24, G-25, G-34, G-33, G-42, G-36). It is a static
 single-page web app with three role views (Harold, Rachel, Dr. Nguyen), mock seed data and a
-simulated clock. All safety rules (window-based missed flags, immediate duplicate/unsure flags,
-urgency-based routing, and Rachel's consent tiers) live in pure, unit-tested domain functions,
+simulated clock. All safety rules (window-based missed flags with settings snapshotted when a
+dose becomes due, immediate duplicate/unsure flags, the 2-hour early-dose limit and 6-hour
+repeat check, confirming after "unsure", urgency-based routing, and Rachel's consent tiers) live in pure, unit-tested domain functions,
 each tagged with its FR ID so that `docs/traceability.md` can point to them.
 
 ## Technical Context
@@ -50,7 +51,7 @@ text, ≥ 64 px buttons)
 | IV. Specification Before Implementation | Plan derives only from spec; every requirement has acceptance scenarios; quickstart exercises all of them; v1 tag before V2 work | PASS | PASS |
 | V. Simple, Accessible, Mock-Data Prototype | Static Vite build, mock data, no backend/auth/real messaging; large-print rules (R7) | PASS | PASS |
 | Safety, Privacy and Consent Constraints | Routing and Rachel-view invariants 1–5 in domain contract | PASS | PASS |
-| Workflow and Quality Gates | Repo layout `frontend/`, `specs/`, `docs/`; learning log left to the team | PASS | PASS |
+| Workflow and Quality Gates | Repo layout `frontend/`, `specs/`, `docs/`; learning log left to the team; `v1` tagged only after the quickstart passes on the deployed URL | PASS | PASS |
 
 No violations, so Complexity Tracking is empty.
 

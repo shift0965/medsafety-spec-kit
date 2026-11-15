@@ -12,11 +12,11 @@ G-19, G-20). It uses mock data only.
 
 | Deliverable | Link |
 |---|---|
-| 1. GitHub Version 1 | TODO: link to the `v1` tag |
-| 2. GitHub Version 2 | TODO: link to the `v2` tag |
+| 1. GitHub Version 1 | Tag `v1` (commit `c20caf5`); view with `git checkout v1` |
+| 2. GitHub Version 2 | Tag `v2` (commit `0b11f7f`); view with `git checkout v2` |
 | 3. Prototype V1 URL | TODO: deployed V1 URL |
 | 4. Prototype V2 URL | TODO: deployed V2 URL |
-| 5. Requirements Analysis and Learning Log | TODO: [`docs/learning-log.md`](docs/learning-log.md) (written by the team) |
+| 5. Requirements Analysis and Learning Log | [`docs/learning-log.md`](docs/learning-log.md) (written by the team); supporting: [`docs/traceability.md`](docs/traceability.md), [`docs/goal-model.md`](docs/goal-model.md) |
 
 ## Repository
 
@@ -52,8 +52,10 @@ V1 and V2 are deployed separately so both stay available.
 
 ## Roles and Responsibilities
 
-TODO: list each group member and their contributions.
-
 | Member | Contributions |
 |---|---|
-| | |
+| Aden Jo | Summarized the goal models and identified the critical goals; grouped goals and trimmed trivial details to decide what to build; V1 feature development. |
+| Akilesh Srinivasa Kumar | Handled conflicts, gave insights to resolve disagreements and identified their root causes; recorded traceability and identified gaps for V2 development. |
+| Jackie Chen | Managed the Git repository and Spec Kit workflow; implemented, debugged and deployed the product; wrote the prompts for the AI agent. |
+
+All three members wrote the learning log together.

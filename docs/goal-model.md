@@ -1,6 +1,7 @@
-# Goal Model — Sprint 1 (V1)
+# Goal Model — Sprint 1 (V1) and V2 revision
 
 **Source model:** HW2 combined goal model (G-1 to G-36). G-38, G-42 and G-43 are new in this sprint.
+**V2:** V2 adds G-18/G-19 (resolve uncertain doses) after V1 evaluation, with G-20 (see §6).
 **Sprint theme:** Dose confirmation and risk-based missed/duplicate-dose alerts
 
 ## 1. Sprint Scope
@@ -29,9 +30,17 @@
 | G-42 | RachelDesignatedSafetyContact **If** HaroldOptsIn | Harold | T1:46; T3:33 |
 | G-36 | LargeTextAndButtons | App | F1:12, F1:41 |
 
+**Added in V2** (see §6)
+
+| ID | Goal | Agent | Evidence |
+|---|---|---|---|
+| G-18 | DoseStatusResolved **If** DoseStatusUncertain | — (parent, refined into G-19 and G-20) | T1:44; F2:22 |
+| G-19 | PharmacistAdviceGiven **If** DoseFlagged | Dr. Nguyen | T1:44; F2:22, F2:34 |
+| G-20 | DoseWithheld **Until** Advised | Harold | T1:44 |
+
 ## 2. Sprint Goal Model
 
-Parallelogram = goal, hexagon = agent. "complete" = complete AND-refinement, "partial" = incomplete AND-refinement; separate arrows into one goal are OR-alternatives; grey dashed = rejected; dotted labeled lines = the conflicts and trade-off in §4.
+Parallelogram = goal, hexagon = agent. "complete" = complete AND-refinement, "partial" = incomplete AND-refinement; separate arrows into one goal are OR-alternatives; grey dashed = rejected; dotted labeled lines = the conflicts and trade-off in §4; blue fill = goals added to the build in V2.
 
 ```mermaid
 flowchart BT
@@ -46,7 +55,7 @@ flowchart BT
   G17[/"G-17: LastTakenTimeShown"/]
   G18[/"G-18: DoseStatusResolved If DoseStatusUncertain"/]
   G43[/"G-43: DoseMarkedUnsure If HaroldCannotRemember"/]
-  G19[/"G-19: PharmacistAdviceGiven"/]
+  G19[/"G-19: PharmacistAdviceGiven If DoseFlagged"/]
   G20[/"G-20: DoseWithheld Until Advised"/]
   G21[/"G-21: DoseIssueAlerted If MissedOrDuplicated"/]
   G38[/"G-38: WindowAndRiskLevelSetPerMedication"/]
@@ -83,10 +92,11 @@ flowchart BT
   G43 --- R4
   G18 --- R4
 
+  %% V2: V1's two OR-alternatives (R12, R13) become one AND-refinement:
+  %% Dr. Nguyen advises and Harold waits. Partial: Harold still has to act on the advice.
   R12(("partial")) --> G18
   G19 --- R12
-  R13(("partial")) --> G18
-  G20 --- R13
+  G20 --- R12
 
   R5(("complete")) --> G21
   G38 --- R5
@@ -139,6 +149,8 @@ flowchart BT
 
   classDef rejected stroke-dasharray: 5 5,color:#888,stroke:#888
   class G26,R7 rejected
+  classDef v2 fill:#dbeafe,stroke:#1d4ed8
+  class G18,G19,G20 v2
 ```
 
 ## 3. Overlaps
@@ -195,3 +207,15 @@ flowchart BT
 - G-22 depends on G-8, G-43 and G-38.
 - G-24 and G-25 depend on G-38 for risk level.
 - Alerts to Rachel depend on G-33 and G-42.
+- V2: G-19 depends on G-22 (a flag exists).
+
+## 6. V2 Revision
+
+- **V1 finding:** FR-008, FR-009 and FR-015 are partially satisfied. Harold is told to wait or check
+  with Dr. Nguyen, but nothing ever resolves the flag.
+- **Root cause:** G-18 and G-19 were out of scope, so V1 could flag a problem but not close it.
+- **Decision:** build G-18, G-19 and G-20, which were already in the HW2 model (T1:44; F2:22, F2:34).
+  R12 changes from V1's two OR-alternatives to one partial AND-refinement: Dr. Nguyen advises (G-19)
+  and Harold waits until then (G-20).
+- **Open question:** if Dr. Nguyen doesn't answer, Harold keeps waiting (G-20). What should happen?
+  The C2 consent question also stays open.

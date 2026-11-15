@@ -248,8 +248,8 @@ advised (quickstart section F, steps 21–27).
 - [X] T068 [P] Update the summary in `README.md` to name the V2 goals (G-18, G-19, G-20: Dr. Nguyen's advice resolves flagged doses); keep the V1 links and TODOs as they are
 - [X] T069 Run `npm test` and `npm run build` in `frontend/`; check Harold's new texts and dialog against SC-006 and the ui-views wording rules (≥ 24 px text, ≥ 64 px buttons, no app dosing advice)
 - [X] T070 Walk through all of `specs/001-dose-safety-alerts/quickstart.md` locally (A–F, steps 1–27) and record failures as implementation defects or requirements issues for the V2 evaluation
-- [ ] T071 Deploy V2 as a separate static site (V1 URL stays live; research R9) and replace the "Prototype V2 URL" `TODO` in `README.md`
-- [ ] T072 Walk through `quickstart.md` against the deployed V2 URL; fix and redeploy if any step fails
+- [X] T071 Deploy V2 as a separate static site (V1 URL stays live; research R9) and replace the "Prototype V2 URL" `TODO` in `README.md`
+- [X] T072 Walk through `quickstart.md` against the deployed V2 URL; fix and redeploy if any step fails
 - [ ] T073 Tag `v2` (`git tag v2 && git push origin v2`) and replace the "GitHub Version 2" `TODO` in `README.md` with the link to the tag
 
 ---

@@ -16,7 +16,9 @@ G-19, G-20). It uses mock data only.
 | 2. GitHub Version 2 | [`main` branch](https://github.com/shift0965/medsafety-spec-kit/tree/main) |
 | 3. Prototype V1 URL | https://medsafety-v1.vercel.app/ |
 | 4. Prototype V2 URL | https://medsafety-v2.vercel.app/ |
-| 5. Requirements Analysis and Learning Log | [`docs/learning-log.md`](docs/learning-log.md) (written by the team); supporting: [`docs/traceability.md`](docs/traceability.md), [`docs/goal-model.md`](docs/goal-model.md) |
+| 5. Requirements Analysis and Learning Log | [`docs/learning-log.md`](docs/learning-log.md) |
+| Requirements Traceability Matrix | [`docs/traceability.md`](docs/traceability.md) |
+| Goal Model | [`docs/goal-model.md`](docs/goal-model.md) |
 
 ## Repository
 

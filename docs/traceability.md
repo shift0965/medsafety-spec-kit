@@ -3,8 +3,8 @@
 Spec: [`spec.md`](../specs/001-dose-safety-alerts/spec.md) · Goal model: [`goal-model.md`](goal-model.md)
 
 Evidence codes: T1 Harold, T2 Rachel, T3 Dr. Nguyen, F1/F2 follow-ups. Code paths are relative to
-`frontend/src/`; tests are in `frontend/tests/domain/`. The first table describes V1 as tagged
-(`c20caf5`); V2 rows below point at the current code. Status is based on our V1 walkthrough
+`frontend/src/`; tests are in `frontend/tests/domain/`. The first table describes V1 (branch
+`v1-release`, commit `c20caf5`); V2 rows below point at the current code. Status is based on our V1 walkthrough
 of `quickstart.md`.
 
 | Requirement | Interview Evidence | Goal Model Reference | Code / Implementation | Status |

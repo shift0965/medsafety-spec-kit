@@ -12,7 +12,7 @@ description: "Task list for Dose Confirmation and Risk-Based Missed/Duplicate-Do
 [contracts/ui-views.md](./contracts/ui-views.md), [quickstart.md](./quickstart.md)
 
 **Tests**: Included for the domain rules only. The plan (R8) and quickstart require `npm test`
-to cover the domain invariants and rule-based acceptance scenarios before tagging `v1`. UI
+to cover the domain invariants and rule-based acceptance scenarios before releasing V1. UI
 scenarios are checked by the manual quickstart walkthrough.
 
 **Traceability (Constitution I)**: Every domain function gets a one-line comment naming its FR
@@ -179,12 +179,12 @@ own.
 - [X] T045 Run `npm test` and `npm run build` in `frontend/`; confirm `frontend/dist/` contains a static site that works with `npm run preview` (deployable per research R9 with project root `frontend/`, build command `npm run build`, output `dist`)
 - [X] T046 Walk through all steps of `specs/001-dose-safety-alerts/quickstart.md` (including 7a, 9a, 15a) locally and record any failures as implementation defects or requirements issues for the V1 evaluation
 
-### Deploy and tag V1 (D2)
+### Deploy and release V1 (D2)
 
-- [ ] T047 Deploy `frontend/dist` as a static site (project root `frontend/`, build command `npm run build`, output `dist`; research R9) and note the V1 URL
-- [ ] T048 Replace the "Prototype V1 URL" `TODO` in `README.md` with the deployed URL
-- [ ] T049 Walk through all steps of `specs/001-dose-safety-alerts/quickstart.md` against the deployed URL; fix and redeploy if any step fails
-- [ ] T050 Tag `v1` at the V1 commit (`git tag v1 c20caf5 && git push origin v1`) and replace the "GitHub Version 1" `TODO` in `README.md` with the link to the tag
+- [X] T047 Deploy `frontend/dist` as a static site (project root `frontend/`, build command `npm run build`, output `dist`; research R9) and note the V1 URL
+- [X] T048 Replace the "Prototype V1 URL" `TODO` in `README.md` with the deployed URL
+- [X] T049 Walk through all steps of `specs/001-dose-safety-alerts/quickstart.md` against the deployed URL; fix and redeploy if any step fails
+- [X] T050 Preserve V1 on GitHub (branch `v1-release` from V1 commit `c20caf5`) and replace the "GitHub Version 1" `TODO` in `README.md` with the link to it
 
 ---
 
@@ -194,8 +194,8 @@ own.
 User Story 6) and research R11–R14. V1 tasks above stay as history; V2 keeps the V1 stack and
 adds only what V2 needs.
 
-**Prerequisite**: V1 is deployed and tagged (T047–T050) before any V2 code is committed, so the
-V1 URL and `v1` tag keep showing V1.
+**Prerequisite**: V1 is deployed and preserved on the `v1-release` branch (T047–T050) before any
+V2 code is committed, so the V1 URL and branch keep showing V1.
 
 ---
 
@@ -242,7 +242,7 @@ advised (quickstart section F, steps 21–27).
 
 ---
 
-## Phase 11: V2 Polish, Deploy and Tag
+## Phase 11: V2 Polish, Deploy and Release
 
 - [X] T067 [P] Update `docs/traceability.md` for V2: retitle "Prototype V1 and V2"; rows for revised FR-008, FR-009, FR-015 and new FR-024–FR-028 with evidence and goals copied from spec.md (G-18, G-19, G-20), code in `advice.ts` / `AdvicePanel.tsx` / `LateDoseDialog.tsx` and tests in `us6-advice.test.ts`; note FR-023 as retired; V2 status column "To evaluate" for the team. Do not edit `docs/learning-log.md` (team-authored)
 - [X] T068 [P] Update the summary in `README.md` to name the V2 goals (G-18, G-19, G-20: Dr. Nguyen's advice resolves flagged doses); keep the V1 links and TODOs as they are
@@ -250,104 +250,4 @@ advised (quickstart section F, steps 21–27).
 - [X] T070 Walk through all of `specs/001-dose-safety-alerts/quickstart.md` locally (A–F, steps 1–27) and record failures as implementation defects or requirements issues for the V2 evaluation
 - [X] T071 Deploy V2 as a separate static site (V1 URL stays live; research R9) and replace the "Prototype V2 URL" `TODO` in `README.md`
 - [X] T072 Walk through `quickstart.md` against the deployed V2 URL; fix and redeploy if any step fails
-- [ ] T073 Tag `v2` (`git tag v2 && git push origin v2`) and replace the "GitHub Version 2" `TODO` in `README.md` with the link to the tag
-
----
-
-## Dependencies & Execution Order
-
-### Phase Dependencies
-
-- **Setup (Phase 1)**: no dependencies.
-- **Foundational (Phase 2)**: depends on Setup; blocks all user stories.
-- **US1 (Phase 3)**: depends on Foundational.
-- **US2 (Phase 4)**: depends on Foundational and on `confirmDose` from US1 (T017), which it extends.
-- **US3 (Phase 5)**: depends on Foundational only.
-- **US4 (Phase 6)**: depends on Foundational and on `confirmDose` (T017) and `AlertList` (T025).
-- **US5 (Phase 7)**: depends on Foundational and on `AlertList` (T025).
-- **Polish (Phase 8)**: after the stories to be shipped in V1.
-- **V2 Foundational (Phase 9)**: after T047–T050 (V1 deployed and tagged); blocks US6.
-- **US6 (Phase 10)**: depends on Phase 9 and on V1 US2 (`resolveDuplicateChoice`, `markUnsure`), US3 (`nguyenView`) and US4 (`confirmDose` taken late, LateDoseDialog).
-- **V2 Polish (Phase 11)**: after US6; T071–T073 in order.
-
-### Story completion order
-
-```text
-Setup → Foundational → US1 (MVP) → US2 → { US3, US4 } → US5 → Polish → V1 tag
-                                  └──── US3 can start right after Foundational
-V1 tag → V2 Foundational → US6 → V2 Polish → V2 tag
-```
-
-### Within each story
-
-- Write the story's test file first and see it fail, then implement domain functions, then UI.
-- Domain (`frontend/src/domain/`) before store actions before views.
-- Shared files touched by several stories, worked on in order: `doses.ts` (T008 → T017 → T022/T023 → T033), `alerts.ts` (T010 → T025 → T038), `clock.ts` (T009 → T032), `HaroldView.tsx` (T020 → T026 → T035 → T040), `store.tsx` (T011 → T020 → T026 → T030 → T040).
-- V2 shared files: `advice.ts` (T057 → T059 → T060), `views.ts` (T061 after T057), `store.tsx` (T053 → T065), `helpers.ts` (T055 before T056).
-
-### Parallel Opportunities
-
-- Setup: T002, T003, T004.
-- Foundational: T006, T007 together after T005; T012, T013 alongside T008–T011.
-- Each story's test task is [P] with that story's [P] UI components.
-- US3 (T027–T030) can run alongside US1/US2 work since it touches different files except `views.ts`, `store.tsx` and `App.tsx`.
-
----
-
-## Parallel Example: User Story 2
-
-```bash
-# After T017 is done:
-Task: "T021 Write frontend/tests/domain/us2-unsure-duplicate.test.ts"
-Task: "T024 Create frontend/src/components/ConfirmDuplicateDialog.tsx"
-Task: "T025 Create frontend/src/components/AlertList.tsx"
-# Then sequentially: T022 → T023 → T026
-```
-
-## Parallel Example: User Story 6
-
-```bash
-# After T055–T056:
-Task: "T062 Create frontend/src/components/AdvicePanel.tsx"
-Task: "T063 Rewrite frontend/src/components/LateDoseDialog.tsx"
-# Then sequentially: T057 → T058 → T059 → T060 → T061 → T064 → T065 → T066
-```
-
-## Parallel Example: User Story 5
-
-```bash
-Task: "T036 Write frontend/tests/domain/us5-consent.test.ts"
-Task: "T039 Create frontend/src/components/SharingSettings.tsx"
-# Then: T037 → T038 → T040 → T041
-```
-
----
-
-## Implementation Strategy
-
-### MVP First (User Story 1 only)
-
-1. Phase 1 Setup → Phase 2 Foundational.
-2. Phase 3 US1.
-3. **Stop and check**: quickstart steps 1–3, `npm test`.
-
-### Incremental delivery
-
-1. US1 → one-tap confirm and last-taken time (MVP).
-2. US2 → unsure and duplicate safety checks (completes the P1 double-dose protection).
-3. US3 + US4 → windows, risk levels and urgency-based alerts (C1, C3).
-4. US5 → Rachel's consent tiers (C2).
-5. Polish → traceability matrix, README, build, local walkthrough, deploy, walkthrough on the deployed URL, then tag `v1`.
-6. V2 → Phase 9, US6, then V2 polish, deploy and tag `v2`. Stop and check after US6: quickstart section F and `npm test`.
-
----
-
-## Notes
-
-- [P] tasks touch different files and have no dependency on incomplete tasks.
-- Keep every rule inside `frontend/src/domain/`; components must not compute flags or routing.
-- The in-app safety-contact toggle stands in for consent for the demo only; the C2 open question
-  stays open (Constitution III).
-- Commit after each task or logical group; do not tag `v1` (T050) until T045–T049 are done, or
-  `v2` (T073) until T069–T072 are done.
-- V2: the "if Dr. Nguyen doesn't answer" question stays open; holds simply stay until advice.
+- [X] T073 Preserve V2 on GitHub (branch `main`) and replace the "GitHub Version 2" `TODO` in `README.md` with the link to it

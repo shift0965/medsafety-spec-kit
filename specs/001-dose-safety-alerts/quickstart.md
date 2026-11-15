@@ -120,12 +120,12 @@ Steps marked *(V2)* changed in the V2 revision; section F is new in V2.
 ## Expected automated checks
 
 `npm test` covers the invariants in [contracts/domain-api.md](./contracts/domain-api.md) (V2 adds
-10–13) and the rule-based acceptance scenarios (US2, US4, US5, US6). All must pass before tagging
-`v1` (V1) or `v2` (V2).
+10–13) and the rule-based acceptance scenarios (US2, US4, US5, US6). All must pass before a version is
+released (`v1-release` branch for V1, `main` for V2).
 
 ## Deploy
 
 Build `frontend/` and deploy `frontend/dist` as a static site (research R9). Record the URL in
-`README.md`, repeat this walkthrough against the deployed URL, and only then tag `v1`. Later,
-create a separate deployment for `v2`, repeat the walkthrough (including section F) against it,
-record its URL, and only then tag `v2`.
+`README.md`, repeat this walkthrough against the deployed URL, and only then publish the `v1-release` branch.
+Later, create a separate deployment for `v2`, repeat the walkthrough (including section F) against it,
+record its URL, and only then push V2 to `main`.

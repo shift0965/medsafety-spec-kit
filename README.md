@@ -12,9 +12,9 @@ G-19, G-20). It uses mock data only.
 
 | Deliverable | Link |
 |---|---|
-| 1. GitHub Version 1 | Tag `v1` (commit `c20caf5`); view with `git checkout v1` |
-| 2. GitHub Version 2 | Tag `v2` (latest V2 commit); view with `git checkout v2` |
-| 3. Prototype V1 URL | TODO: deployed V1 URL |
+| 1. GitHub Version 1 | [`v1-release` branch](https://github.com/shift0965/medsafety-spec-kit/tree/v1-release) |
+| 2. GitHub Version 2 | [`main` branch](https://github.com/shift0965/medsafety-spec-kit/tree/main) |
+| 3. Prototype V1 URL | https://medsafety-v1.vercel.app/ |
 | 4. Prototype V2 URL | https://medsafety-v2.vercel.app/ |
 | 5. Requirements Analysis and Learning Log | [`docs/learning-log.md`](docs/learning-log.md) (written by the team); supporting: [`docs/traceability.md`](docs/traceability.md), [`docs/goal-model.md`](docs/goal-model.md) |
 

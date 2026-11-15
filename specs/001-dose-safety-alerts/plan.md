@@ -59,7 +59,7 @@ text, ≥ 64 px buttons)
 | IV. Specification Before Implementation | Plan derives only from spec; V2 spec revised before this plan; every requirement has acceptance scenarios (US6 for FR-024–FR-028); quickstart exercises all of them; V1 preserved at commit `c20caf5` / `v1` tag | PASS | PASS |
 | V. Simple, Accessible, Mock-Data Prototype | Static Vite build, mock data, no backend/auth/real messaging; large-print rules (R7) | PASS | PASS |
 | Safety, Privacy and Consent Constraints | Routing and Rachel-view invariants 1–5 in domain contract | PASS | PASS |
-| Workflow and Quality Gates | Repo layout `frontend/`, `specs/`, `docs/`; learning log left to the team; `v1` tagged only after the quickstart passes on the deployed URL | PASS | PASS |
+| Workflow and Quality Gates | Repo layout `frontend/`, `specs/`, `docs/`; learning log left to the team; `v1-release` branch published only after the quickstart passes on the deployed URL | PASS | PASS |
 
 No violations, so Complexity Tracking is empty.
 

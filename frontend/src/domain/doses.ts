@@ -4,6 +4,7 @@ import { EARLY_CONFIRM_MINUTES, REPEAT_CHECK_MINUTES } from "./types";
 import { addMinutes, atTime, formatHHMM, minutesBetween } from "./time";
 import { effectiveRisk, effectiveWindow, findMedication } from "./medications";
 import { raiseFlag } from "./flags";
+import { advisedSinceLastConfirmation } from "./advice";
 
 export function findDose(state: AppState, doseId: string): Dose {
   const dose = state.doses.find((d) => d.id === doseId);
@@ -34,6 +35,7 @@ export function ensureDosesForDay(state: AppState, day: string): AppState {
         confirmations: [],
         unsureAt: null,
         reminderShownAt: null,
+        releasedAt: null,
       });
     }
   }
@@ -50,9 +52,10 @@ export function snapshotSettings(state: AppState, doseId: string): AppState {
   return updateDose(state, doseId, { windowMinutes: effectiveWindow(med), riskLevel: effectiveRisk(med) });
 }
 
+// R13: a held dose released after its due time counts its window from the release
 export function windowClosesAt(state: AppState, dose: Dose): Instant {
   const window = dose.windowMinutes ?? effectiveWindow(findMedication(state, dose.medicationId));
-  return addMinutes(dose.dueAt, window);
+  return addMinutes(dose.releasedAt ?? dose.dueAt, window);
 }
 
 /** Latest confirmation time for a medication across all its doses (FR-005). */
@@ -72,8 +75,10 @@ export function mostRecentConfirmedDose(state: AppState, medId: string): Dose | 
   return state.doses.find((d) => d.medicationId === medId && d.confirmations.includes(latest)) ?? null;
 }
 
-// FR-009: an already-confirmed dose, or a medication confirmed less than 6 h ago, opens the prompt
+// FR-009: an already-confirmed dose, or a medication confirmed less than 6 h ago, opens the prompt.
+// FR-027 (V2): not after advice given since the latest confirmation.
 function needsDuplicatePrompt(state: AppState, dose: Dose): boolean {
+  if (advisedSinceLastConfirmation(state, dose.medicationId)) return false;
   if (dose.confirmations.length > 0) return true;
   const latest = latestConfirmation(state, dose.medicationId);
   return latest !== null && minutesBetween(latest, state.clock) < REPEAT_CHECK_MINUTES;

@@ -4,6 +4,7 @@ import { createSeedState } from "../../src/domain/seed";
 import { tick } from "../../src/domain/clock";
 import { windowClosesAt } from "../../src/domain/doses";
 import { rachelView } from "../../src/domain/consent";
+import { heldDose } from "../../src/domain/advice";
 
 export const DAY = "2026-11-14";
 export const at = (hhmm: string) => `${DAY}T${hhmm}`;
@@ -22,13 +23,13 @@ export function dose(state: AppState, medId: string, hhmm: string): Dose {
 
 export const alertsFor = (state: AppState, who: string) => state.alerts.filter((a) => a.recipient === who);
 
-/** Invariants 1–5 and 9 from contracts/domain-api.md. */
+/** Invariants 1–5 and 9–13 from contracts/domain-api.md. */
 export function expectInvariants(state: AppState) {
   for (const f of state.flags) {
     const d = state.doses.find((x) => x.id === f.doseId)!;
     // 1. FR-014: missed flags only once the window has closed
     if (f.reason === "missed") expect(state.clock >= windowClosesAt(state, d)).toBe(true);
-    const forFlag = state.alerts.filter((a) => a.flagId === f.id);
+    const forFlag = state.alerts.filter((a) => a.flagId === f.id && a.kind === "flag");
     if (f.riskLevel === "high") {
       // 2. FR-016
       expect(forFlag.filter((a) => a.recipient === "harold" && a.urgency === "urgent")).toHaveLength(1);
@@ -50,4 +51,28 @@ export function expectInvariants(state: AppState) {
       expect(d.riskLevel).not.toBeNull();
     }
   }
+  // 10. V2 (FR-009, FR-027): held and skipped doses never get a missed flag; held doses no reminder
+  for (const d of state.doses) {
+    if (d.status === "held" || d.status === "skipped") {
+      expect(state.flags.some((f) => f.doseId === d.id && f.reason === "missed")).toBe(false);
+    }
+    if (d.status === "held") expect(d.reminderShownAt).toBeNull();
+  }
+  // 11. V2 (FR-008, FR-009): only an open unsure/duplicate flag's next dose is held, and it is
+  // never due once its due time is reached
+  const heldIds = new Set(
+    state.flags.map((f) => heldDose(state, f)?.id).filter((id): id is string => id !== undefined),
+  );
+  for (const d of state.doses) {
+    if (d.status === "held") expect(heldIds.has(d.id)).toBe(true);
+    if (heldIds.has(d.id) && d.dueAt <= state.clock) expect(["due", "scheduled"]).not.toContain(d.status);
+  }
+  // 12. V2 (FR-025, FR-027): one advice per resolved flag, and advice only on resolved flags
+  for (const f of state.flags) {
+    const n = state.advice.filter((a) => a.flagId === f.id).length;
+    expect(n).toBe(f.status === "resolved" ? 1 : 0);
+  }
+  // 13. V2 (C2): Rachel never gets advice requests or advice
+  expect(alertsFor(state, "rachel").some((a) => a.kind === "adviceRequest")).toBe(false);
+  expect(JSON.stringify(rachelView(state))).not.toContain("Dr. Nguyen:");
 }

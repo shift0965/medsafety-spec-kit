@@ -263,6 +263,29 @@ select:focus-visible {
   border-radius: 8px;
 }
 
+/* V2: Dr. Nguyen's advice on a card and as a notice (FR-026) */
+.med-card__nguyen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--routine-bg);
+  border: 2px solid var(--accent);
+  border-radius: 8px;
+}
+
+.med-card__nguyen p {
+  flex: 1 1 200px;
+  margin: 0;
+  font-weight: 700;
+}
+
+.alert--advice {
+  background: var(--routine-bg);
+  border-color: var(--accent);
+}
+
 .med-card__flags {
   margin: 6px 0;
   padding-left: 1.2em;
@@ -327,6 +350,35 @@ select:focus-visible {
 }
 
 /* Dr. Nguyen and Rachel */
+.advice-panel {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.advice-panel__item {
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.advice-panel__item p {
+  margin: 4px 0;
+}
+
+.advice-panel__request {
+  color: var(--urgent-line);
+  font-weight: 700;
+}
+
+.advice-panel__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 .table-wrap {
   overflow-x: auto;
 }

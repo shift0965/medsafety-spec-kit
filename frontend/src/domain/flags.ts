@@ -17,6 +17,10 @@ export function raiseFlag(state: AppState, doseId: string, reason: FlagReason, a
     raisedAt: at,
     riskLevel: dose.riskLevel ?? effectiveRisk(med),
     note: null,
+    status: "open",
+    resolvedAt: null,
+    adviceRequestedAt: null,
+    takenBeforeRequest: null,
   };
   return routeFlag({ ...state, flags: [...state.flags, flag] }, flag);
 }

@@ -15,6 +15,7 @@ export function createSeedState(day: string): AppState {
     doses: [],
     flags: [],
     alerts: [],
+    advice: [],
     consent: { rachelIsSafetyContact: false },
   };
 }

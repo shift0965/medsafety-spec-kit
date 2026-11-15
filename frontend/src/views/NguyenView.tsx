@@ -5,6 +5,7 @@ import { nguyenView, type NguyenMedicationRow } from "../domain/views";
 import { setMedicationSettings } from "../domain/medications";
 import type { RiskLevel } from "../domain/types";
 import AlertList from "../components/AlertList";
+import AdvicePanel from "../components/AdvicePanel";
 
 function SettingsRow({ row }: { row: NguyenMedicationRow }) {
   const { state, dispatch } = useStore();
@@ -70,7 +71,7 @@ function SettingsRow({ row }: { row: NguyenMedicationRow }) {
 }
 
 export default function NguyenView() {
-  const { state } = useStore();
+  const { state, dispatch } = useStore();
   const view = nguyenView(state);
   return (
     <div className="nguyen">
@@ -81,6 +82,9 @@ export default function NguyenView() {
       ) : (
         <p className="muted">No new alerts.</p>
       )}
+
+      <h2>Flags awaiting advice</h2>
+      <AdvicePanel flags={view.openFlags} onAdvise={(flagId, option) => dispatch({ type: "GIVE_ADVICE", flagId, option })} />
 
       <h2>Medication settings for Harold</h2>
       <p className="muted">Window: how long after the due time a dose may still be taken. Changes apply from the next due dose.</p>

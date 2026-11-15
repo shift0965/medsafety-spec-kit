@@ -16,7 +16,8 @@ describe("US2: unsure and duplicate doses are flagged straight away", () => {
     expect(dose(s, "warfarin", "08:00").status).toBe("unsure");
     expect(dose(s, "warfarin", "08:00").unsureAt).toBe(at("08:10"));
     expect(s.flags.filter((f) => f.doseId === W)).toEqual([expect.objectContaining({ doseId: W, reason: "unsure", raisedAt: at("08:10") })]);
-    expect(card(s, "warfarin").unsureAdvice).toContain("Please wait before taking another");
+    // V2: FR-008 revised wording
+    expect(card(s, "warfarin").waitingForAdvice).toBe("Please wait for Dr. Nguyen's advice before taking another.");
   });
 
   it("US2-2 / FR-009: confirming a taken dose asks instead of changing state", () => {
@@ -82,7 +83,10 @@ describe("US2: unsure and duplicate doses are flagged straight away", () => {
     const after = resolveDuplicateChoice(s, evening, "tookAnother");
     expect(dose(after, "metoprolol", "08:00").status).toBe("duplicate");
     expect(dose(after, "metoprolol", "20:00").status).toBe("scheduled");
-    expect(dose(tick(after, at("20:00")), "metoprolol", "20:00").reminderShownAt).toBe(at("20:00"));
+    // V2 (FR-009 revised): the next dose is then held, with no reminder at 20:00
+    const at20 = dose(tick(after, at("20:00")), "metoprolol", "20:00");
+    expect(at20.status).toBe("held");
+    expect(at20.reminderShownAt).toBeNull();
   });
 
   it("invariant 8: a dose never gains a second confirmation without resolveDuplicateChoice", () => {

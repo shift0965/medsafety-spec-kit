@@ -7,8 +7,11 @@ import { confirmDose, markUnsure, resolveDuplicateChoice, type DuplicateChoice }
 import { markAlertRead } from "../domain/alerts";
 import { setMedicationSettings } from "../domain/medications";
 import { setSafetyContact, setShared } from "../domain/consent";
+import { acknowledgeAdvice, giveAdvice, respondToLateCheck, type LateCheckChoice } from "../domain/advice";
+import type { AdviceOption } from "../domain/types";
 
-const STORAGE_KEY = "medsafety-v1";
+// V2 adds fields, so a browser that ran V1 starts from the seed (T053)
+const STORAGE_KEY = "medsafety-v2";
 
 export type Action =
   | { type: "TICK"; now: Instant }
@@ -19,7 +22,10 @@ export type Action =
   | { type: "MARK_ALERT_READ"; alertId: string }
   | { type: "SET_MEDICATION_SETTINGS"; medId: string; windowMinutes: number; riskLevel: RiskLevel }
   | { type: "SET_SAFETY_CONTACT"; enabled: boolean }
-  | { type: "SET_SHARED"; medId: string; shared: boolean };
+  | { type: "SET_SHARED"; medId: string; shared: boolean }
+  | { type: "RESPOND_LATE_CHECK"; doseId: string; choice: LateCheckChoice }
+  | { type: "GIVE_ADVICE"; flagId: string; option: AdviceOption }
+  | { type: "ACKNOWLEDGE_ADVICE"; adviceId: string };
 
 /** The real calendar date only seeds the demo day; all rules use the simulated clock. */
 function today(): string {
@@ -51,6 +57,12 @@ function apply(state: AppState, action: Action): AppState {
       return setSafetyContact(state, action.enabled);
     case "SET_SHARED":
       return setShared(state, action.medId, action.shared);
+    case "RESPOND_LATE_CHECK":
+      return respondToLateCheck(state, action.doseId, action.choice);
+    case "GIVE_ADVICE":
+      return giveAdvice(state, action.flagId, action.option);
+    case "ACKNOWLEDGE_ADVICE":
+      return acknowledgeAdvice(state, action.adviceId);
   }
 }
 
@@ -68,7 +80,9 @@ function load(): AppState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const saved = JSON.parse(raw) as AppState;
-      if (saved && typeof saved.clock === "string" && Array.isArray(saved.doses)) return tick(saved, saved.clock);
+      if (saved && typeof saved.clock === "string" && Array.isArray(saved.doses) && Array.isArray(saved.advice)) {
+        return tick(saved, saved.clock);
+      }
     }
   } catch {
     // Storage unavailable or corrupt: fall back to the seed.

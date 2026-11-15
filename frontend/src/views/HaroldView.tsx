@@ -42,6 +42,9 @@ export default function HaroldView() {
     confirm(card, card.confirmTargetId);
   };
 
+  // FR-026
+  const acknowledge = (adviceId: string) => dispatch({ type: "ACKNOWLEDGE_ADVICE", adviceId });
+
   const onNotSure = (card: HaroldCard) => {
     if (card.doseId) dispatch({ type: "MARK_UNSURE", doseId: card.doseId });
   };
@@ -50,9 +53,27 @@ export default function HaroldView() {
     <div className="harold">
       <h1 className="view-title">Your medicines</h1>
       <AlertList mode="full" alerts={view.alerts} />
+      {view.adviceNotices.length > 0 && (
+        <ul className="alerts">
+          {view.adviceNotices.map((n) => (
+            <li key={n.id} className="alert alert--advice">
+              <span className="alert__text">
+                {n.medicationName} — {n.text}
+              </span>
+              <button onClick={() => acknowledge(n.id)}>OK</button>
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="med-list">
         {view.cards.map((card) => (
-          <MedicationCard key={card.medicationId} card={card} onTookIt={onTookIt} onNotSure={onNotSure} />
+          <MedicationCard
+            key={card.medicationId}
+            card={card}
+            onTookIt={onTookIt}
+            onNotSure={onNotSure}
+            onAcknowledge={acknowledge}
+          />
         ))}
       </div>
       <SharingSettings />
@@ -60,7 +81,14 @@ export default function HaroldView() {
       {pending?.kind === "late" && (
         <LateDoseDialog
           medicationName={pending.card.name}
-          onRecord={() => confirm(pending.card, pending.doseId)}
+          onAsk={() => {
+            dispatch({ type: "RESPOND_LATE_CHECK", doseId: pending.doseId, choice: "ask" });
+            setPending(null);
+          }}
+          onAlreadyTook={() => {
+            dispatch({ type: "RESPOND_LATE_CHECK", doseId: pending.doseId, choice: "alreadyTook" });
+            setPending(null);
+          }}
           onBack={() => setPending(null)}
         />
       )}

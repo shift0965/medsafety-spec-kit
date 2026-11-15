@@ -12,7 +12,7 @@ export default function App() {
   return (
     <StoreProvider>
       <header className="app-header">
-        <span className="app-header__title">Medication Safety Prototype · V1</span>
+        <span className="app-header__title">Medication Safety Prototype · V2</span>
         <RoleSwitcher role={role} onChange={setRole} />
       </header>
       <DemoBar />

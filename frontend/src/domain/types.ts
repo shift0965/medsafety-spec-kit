@@ -27,7 +27,10 @@ export type DoseStatus =
   | "takenLate"
   | "unsure"
   | "missed"
-  | "duplicate";
+  | "duplicate"
+  // V2: next dose withheld until Dr. Nguyen's advice (FR-008, FR-009), or skipped on her advice (FR-027)
+  | "held"
+  | "skipped";
 
 export interface Dose {
   /** `${medicationId}@${date}T${time}` */
@@ -42,6 +45,8 @@ export interface Dose {
   unsureAt: Instant | null;
   /** Set once, never re-set (FR-001). */
   reminderShownAt: Instant | null;
+  /** V2: when a held dose was released after its due time; its window counts from here (R13). */
+  releasedAt: Instant | null;
 }
 
 export type FlagReason = "missed" | "duplicate" | "unsure";
@@ -54,6 +59,33 @@ export interface Flag {
   riskLevel: RiskLevel;
   /** e.g. "taken late at 09:15" (FR-015). */
   note: string | null;
+  /** V2: open until Dr. Nguyen gives advice (FR-027). */
+  status: "open" | "resolved";
+  resolvedAt: Instant | null;
+  /** V2: set by Harold's late-dose check (FR-015). */
+  adviceRequestedAt: Instant | null;
+  /** V2: "I already took it" (true) or "Ask Dr. Nguyen" (false). */
+  takenBeforeRequest: boolean | null;
+}
+
+/** V2: fixed advice list (FR-025, team assumption). */
+export type AdviceOption = "takeNow" | "skipNextDose" | "takeNextAsUsual" | "callMe";
+
+export const ADVICE_TEXT: Record<AdviceOption, string> = {
+  takeNow: "Take it now",
+  skipNextDose: "Skip your next dose",
+  takeNextAsUsual: "Take your next dose as usual",
+  callMe: "Please call me",
+};
+
+export interface Advice {
+  id: string;
+  /** Exactly one advice per resolved flag. */
+  flagId: string;
+  option: AdviceOption;
+  givenAt: Instant;
+  /** Harold's notice shows until true (FR-026). */
+  acknowledged: boolean;
 }
 
 export interface Alert {
@@ -62,6 +94,8 @@ export interface Alert {
   recipient: PersonId;
   urgency: "urgent" | "routine";
   contentLevel: "full" | "checkInOnly";
+  /** V2: `adviceRequest` = urgent alert to Dr. Nguyen from FR-015. */
+  kind: "flag" | "adviceRequest";
   createdAt: Instant;
   read: boolean;
 }
@@ -76,6 +110,7 @@ export interface AppState {
   doses: Dose[];
   flags: Flag[];
   alerts: Alert[];
+  advice: Advice[];
   consent: ConsentSettings;
 }
 

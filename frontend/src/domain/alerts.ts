@@ -8,6 +8,7 @@ function makeAlert(flag: Flag, recipient: PersonId, urgency: Alert["urgency"], c
     recipient,
     urgency,
     contentLevel,
+    kind: "flag",
     createdAt: flag.raisedAt, // research R10: alerts appear in the same update as the flag
     read: false,
   };

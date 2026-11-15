@@ -222,9 +222,11 @@ Each requirement lists its goal model reference and interview evidence (Constitu
   supports G-20; T1:44; F2:22)*
 - **FR-009**: When Harold tries to confirm a dose that is already recorded for that due time, or
   a medication that was confirmed less than 6 hours ago (team assumption), System MUST show the
-  existing record's time and offer three choices: "Yes, I took another"
-  (records a duplicate of the most recent dose, at the current time), "No, I tapped by mistake" (records nothing) and "I'm not sure"
-  (marks the dose unsure, FR-007). *(G-22, G-17, supports G-16; T2:14, T2:17)*
+  existing record's time and offer three choices: "Yes, I took another" (records a duplicate
+  of the most recent confirmed dose, at the current time), "No, I tapped by mistake" (records
+  nothing) and "I'm not sure" (marks the most recent confirmed dose unsure, FR-007). In the
+  6-hour case the upcoming dose stays scheduled and still gets its reminder. *(G-22, G-17,
+  supports G-16; T2:14, T2:17)*
 
 **Medication settings**
 
@@ -346,6 +348,14 @@ Carried from `docs/goal-model.md` §3–§4 (Constitution Principle III).
 - Asking Harold to choose between "took another", "tapped by mistake" and "not sure" before
   recording a second dose (FR-009) is a team decision to avoid false duplicate alarms from
   accidental taps without hiding real uncertainty; it is to be validated with stakeholders.
+- Early confirmation is limited to 2 hours before the due time (FR-003); team assumption, to
+  validate with stakeholders.
+- A tap within 6 hours of the medication's last confirmation shows the FR-009 prompt; team
+  assumption, to validate with stakeholders.
+- For a missed high-risk dose, "Check with Dr. Nguyen about this late dose" is shown before
+  recording (FR-015); team assumption, to validate with stakeholders.
+- **Open question (for Dr. Nguyen)**: if a morning dose is taken late (e.g. 15:00), is the
+  evening dose at 20:00 a duplicate risk? The 6-hour rule currently treats it as one.
 - **Open question (C2)**: whether an in-app opt-in counts as Harold's written consent for
   Rachel. To ask Dr. Nguyen and Harold. The prototype treats the in-app toggle as consent for
   demonstration only.

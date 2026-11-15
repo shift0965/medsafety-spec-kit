@@ -37,20 +37,24 @@ of `quickstart.md`.
 ## V2 changes
 
 V2 revises FR-008, FR-009 and FR-015 and adds FR-024–FR-028 (goals G-18, G-19, G-20). FR-023 is
-retired and not reused. Rows above keep the V1 status; the V2 status is for the team's V2
-evaluation. Tests: `us6-advice.test.ts` (plus the updated US2-1 and M4 tests in
+retired and not reused. Rows above keep the V1 status; the V2 status comes from walking through
+`quickstart.md` section F (steps 21–27) in the running app as Harold, Rachel and Dr. Nguyen. Tests: `us6-advice.test.ts` (plus the updated US2-1 and M4 tests in
 `us2-unsure-duplicate.test.ts`).
 
 | Requirement | Interview Evidence | Goal Model Reference | Code / Implementation | V2 Status |
 |---|---|---|---|---|
-| FR-008 *(revised)* After unsure: last-taken time, "Please wait for Dr. Nguyen's advice before taking another.", next dose held, advice shown | T1:44; F2:22, F2:34 | G-43, G-17, G-20, G-19 | `views.ts` `waitingMessage`; `advice.ts` `heldDose`; `clock.ts` `tick` | To evaluate |
-| FR-009 *(revised)* After "Yes, I took another" the next dose is held: no reminder, no missed flag, "Waiting for Dr. Nguyen's advice" | T2:14, T2:17; T1:44 | G-22, G-17, G-20 (supports G-16) | `advice.ts` `heldDose`, `isHeldDose`; `clock.ts` `tick`; `views.ts` `statusLabelForHarold` | To evaluate |
-| FR-015 *(revised)* "This dose is late. Ask Dr. Nguyen before taking it."; both choices send an urgent advice request | T3:55; T1:44; F2:26, F2:34 | G-8, G-22, G-19, G-20 | `advice.ts` `respondToLateCheck`; `LateDoseDialog.tsx` | To evaluate |
-| FR-024 Dr. Nguyen lists every open flag (low-risk without an alert) | F2:22, F2:34 (low-risk listing: team assumption) | G-19, G-18 | `views.ts` `nguyenView` `openFlags`; `AdvicePanel.tsx` | To evaluate |
-| FR-025 Advice from a fixed list of four options | T1:44; F2:34 (list: team assumption) | G-19 | `types.ts` `AdviceOption`; `advice.ts` `giveAdvice`; `AdvicePanel.tsx` | To evaluate |
-| FR-026 "Dr. Nguyen: <advice>" on the card and as a notice until OK | T1:44 | G-19, G-20 | `views.ts` `adviceNotices`; `advice.ts` `acknowledgeAdvice`; `MedicationCard.tsx`, `HaroldView.tsx` | To evaluate |
-| FR-027 Advice resolves the flag, lifts the hold, "Skip your next dose" skips it; next confirm has no FR-009/FR-015 prompt | T1:44; F2:22 | G-18 | `advice.ts` `giveAdvice`, `advisedSinceLastConfirmation`; `doses.ts` `confirmDose` | To evaluate |
-| FR-028 No dosing advice from the app; only the waiting message while a flag awaits advice | F2:26; T1:44 | G-20, G-19 | `views.ts` `waitingMessage`; `LateDoseDialog.tsx` | To evaluate |
+| FR-008 *(revised)* After unsure: last-taken time, "Please wait for Dr. Nguyen's advice before taking another.", next dose held, advice shown | T1:44; F2:22, F2:34 | G-43, G-17, G-20, G-19 | `views.ts` `waitingMessage`; `advice.ts` `heldDose`; `clock.ts` `tick` | Fully (the wait message still says "before taking another" when nothing was recorded) |
+| FR-009 *(revised)* After "Yes, I took another" the next dose is held: no reminder, no missed flag, "Waiting for Dr. Nguyen's advice" | T2:14, T2:17; T1:44 | G-22, G-17, G-20 (supports G-16) | `advice.ts` `heldDose`, `isHeldDose`; `clock.ts` `tick`; `views.ts` `statusLabelForHarold` | Fully |
+| FR-015 *(revised)* "This dose is late. Ask Dr. Nguyen before taking it."; both choices send an urgent advice request | T3:55; T1:44; F2:26, F2:34 | G-8, G-22, G-19, G-20 | `advice.ts` `respondToLateCheck`; `LateDoseDialog.tsx` | Fully |
+| FR-024 Dr. Nguyen lists every open flag (low-risk without an alert) | F2:22, F2:34 (low-risk listing: team assumption) | G-19, G-18 | `views.ts` `nguyenView` `openFlags`; `AdvicePanel.tsx` | Fully (every missed low-risk dose also waits here; a dose with a missed and a duplicate flag needs two answers) |
+| FR-025 Advice from a fixed list of four options | T1:44; F2:34 (list: team assumption) | G-19 | `types.ts` `AdviceOption`; `advice.ts` `giveAdvice`; `AdvicePanel.tsx` | Fully (the same four options appear for every reason, e.g. "Take it now" on a duplicate) |
+| FR-026 "Dr. Nguyen: <advice>" on the card and as a notice until OK | T1:44 | G-19, G-20 | `views.ts` `adviceNotices`; `advice.ts` `acknowledgeAdvice`; `MedicationCard.tsx`, `HaroldView.tsx` | Fully |
+| FR-027 Advice resolves the flag, lifts the hold, "Skip your next dose" skips it; next confirm has no FR-009/FR-015 prompt | T1:44; F2:22 | G-18 | `advice.ts` `giveAdvice`, `advisedSinceLastConfirmation`; `doses.ts` `confirmDose` | Partially: "Please call me" lifts the hold, so Harold gets the reminder and **I took it** before any call (G-20); with no answer the dose stays held (open question) |
+| FR-028 No dosing advice from the app; only the waiting message while a flag awaits advice | F2:26; T1:44 | G-20, G-19 | `views.ts` `waitingMessage`; `LateDoseDialog.tsx` | Fully |
+
+**Summary:** V1: 19 Fully / 3 Partially / 0 Not satisfied (22 requirements) → V2: 26 Fully /
+1 Partially / 0 Not satisfied (27 requirements). FR-008, FR-009 and FR-015 moved from Partially to
+Fully; FR-027 is Partially.
 
 **V2 checks:** 58 domain tests pass (41 V1, with US2-1 and M4 updated for the revised FR-008 and
 FR-009, plus 17 for US6), and all 30 local walkthrough checks pass (quickstart steps 1–27).

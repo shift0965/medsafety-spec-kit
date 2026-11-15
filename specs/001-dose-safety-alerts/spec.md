@@ -4,14 +4,29 @@
 
 **Created**: 2026-11-14
 
-**Status**: Draft
+**Status**: V2 revision (2026-11-15)
 
 **Input**: User description: "Sprint 1 (V1) scope from docs/goal-model.md: remind, confirm, record,
 flag and alert safety loop — G-4, G-7, G-8, G-17, G-43, G-38, G-22, G-24, G-25, G-34, G-33, G-42,
 G-36."
 
-**Source model**: `docs/goal-model.md` (Sprint 1, V1). Evidence codes refer to the interview
-transcripts (T1 Harold, T2 Rachel, T3 Dr. Nguyen) and follow-up interviews (F1 Harold, F2 Rachel).
+**Source model**: `docs/goal-model.md` (Sprint 1, V1, and §6 V2 Revision). Evidence codes refer to
+the interview transcripts (T1 Harold, T2 Rachel, T3 Dr. Nguyen) and follow-up interviews (F1 Harold,
+F2 Rachel).
+
+## V2 changes
+
+- **Why (V1 evaluation):** FR-008, FR-009 and FR-015 were partially satisfied. Harold was told to
+  wait or to check with Dr. Nguyen, but nothing ever resolved the flag. After "Yes, I took
+  another", the next dose was still reminded and later flagged as missed, which invited a third
+  dose.
+- **Goals added:** G-18, G-19 and G-20 (goal model §6), so Dr. Nguyen's advice resolves a flag.
+- **Revised:** FR-008 (wait for advice, then see it), FR-009 (next dose held until advice), FR-015
+  (late high-risk dose sends Dr. Nguyen a request for advice); US2-1, US4-5 and US4-6 updated to
+  match.
+- **New:** FR-024–FR-028 (FR-023 stays retired) and User Story 6.
+- **Unchanged:** the FR-020 and FR-021 findings and the C2 consent question still need stakeholder
+  input.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -64,7 +79,7 @@ shown.
 
 1. **Given** a Warfarin dose is due and unrecorded, **When** Harold taps "I'm not sure",
    **Then** the dose is marked unsure, flagged immediately, and Harold sees the last-taken time
-   and a message advising him to wait until it is checked before taking another.
+   and a message to wait for Dr. Nguyen's advice before taking another (see Story 6).
 2. **Given** today's Warfarin dose was recorded at 08:04, **When** Harold taps to confirm
    Warfarin again, **Then** the app shows "You recorded this at 08:04" with three choices:
    "Yes, I took another", "No, I tapped by mistake" and "I'm not sure".
@@ -132,11 +147,12 @@ while still inside the window.
 4. **Given** a duplicate or unsure flag on a high-risk medication (Story 2), **When** the flag is
    raised, **Then** the urgent alert is sent immediately, without waiting for the window to close.
 5. **Given** Warfarin (high risk) was flagged missed at 09:00, **When** Harold opens it to
-   confirm, **Then** the app first shows "Check with Dr. Nguyen about this late dose" and
-   gives no dosing advice of its own.
-6. **Given** the message in scenario 5 was shown, **When** Harold confirms Warfarin at 09:15,
-   **Then** the dose is recorded as "taken late" at 09:15, the flag remains visible with that
-   note, and already-sent alerts are not withdrawn.
+   confirm, **Then** the app first shows "This dose is late. Ask Dr. Nguyen before taking it."
+   with "Ask Dr. Nguyen" and "I already took it", and gives no dosing advice of its own.
+6. **Given** the message in scenario 5 was shown, **When** Harold chooses "I already took it" at
+   09:15, **Then** the dose is recorded as "taken late" at 09:15, the flag remains visible with
+   that note, already-sent alerts are not withdrawn, and Dr. Nguyen receives a request for advice
+   (Story 6).
 
 ---
 
@@ -173,6 +189,55 @@ view, then open Rachel's view and check exactly what she can see and receive for
 
 ---
 
+### User Story 6 - Dr. Nguyen's advice resolves a flagged dose (Priority: P1, added in V2)
+
+When a dose is flagged (missed, taken twice or "not sure"), Dr. Nguyen sees it and answers with
+advice from a short list. Harold waits until the advice arrives and then sees it on that
+medication. The flag is marked resolved. After a second dose, the next dose of that medication is
+held until Dr. Nguyen has answered, so the app never invites a third dose. The app itself never
+gives dosing advice.
+
+**Why this priority**: V1 evaluation showed that flags were raised but never closed (FR-008,
+FR-009, FR-015 partially satisfied). Harold says he would rather not take another dose and "wait
+for proper advice" (T1:44), and Rachel calls Dr. Nguyen when Harold can't remember an important
+dose (F2:22, F2:34).
+
+**Independent Test**: Raise an unsure flag and a duplicate flag, answer both in Dr. Nguyen's view,
+and check that Harold sees the advice, the flags show as resolved, and a held dose is released or
+skipped as advised.
+
+**Goals**: G-18, G-19, G-20
+
+**Acceptance Scenarios**:
+
+1. **Given** Harold marks Levothyroxine (low risk) "I'm not sure" at 07:05, **When** he looks at
+   its card, **Then** it shows his last-taken time and "Please wait for Dr. Nguyen's advice before
+   taking another." and no other instruction; Dr. Nguyen's view lists the flag as awaiting advice,
+   without an alert. *(FR-008, FR-024, FR-028)*
+2. **Given** the flag in scenario 1 is awaiting advice, **When** Dr. Nguyen chooses "Take it now",
+   **Then** Harold's Levothyroxine card and a notice show "Dr. Nguyen: Take it now", and the flag
+   is shown as resolved with the advice and time. *(FR-025, FR-026, FR-027)*
+3. **Given** Metoprolol's 08:00 dose was recorded at 15:00, **When** Harold chooses "Yes, I took
+   another" at 18:30, **Then** the duplicate is flagged, the 20:00 dose is held: no reminder at
+   20:00 and no missed flag at 21:00, and the card shows "Waiting for Dr. Nguyen's advice".
+   *(FR-009)*
+4. **Given** the 20:00 dose is held as in scenario 3, **When** Dr. Nguyen chooses "Skip your next
+   dose", **Then** the 20:00 dose is marked skipped, gets no reminder and no missed flag, and the
+   duplicate flag is resolved. *(FR-027)*
+5. **Given** the 20:00 dose is held as in scenario 3, **When** Dr. Nguyen chooses "Take your next
+   dose as usual" at 19:00, **Then** the hold is lifted and the reminder appears at 20:00.
+   *(FR-027)*
+6. **Given** Warfarin (high risk) was flagged missed at 09:00, **When** Harold chooses "Ask
+   Dr. Nguyen" at 09:15, **Then** Dr. Nguyen receives an urgent "advice requested" alert for that
+   flag, nothing is recorded as taken, and Harold's card shows "Please wait for Dr. Nguyen's
+   advice before taking it." *(FR-015)*
+7. **Given** a flag was resolved, **When** anyone views it later, **Then** it still appears,
+   marked resolved with the advice and time, and earlier alerts are not withdrawn. *(FR-027)*
+8. **Given** any flag is awaiting advice, **When** Harold views the medication, **Then** the app
+   shows no dosing instruction of its own, only the waiting message. *(FR-028)*
+
+---
+
 ### Edge Cases
 
 - **Two medications due at the same time**: each gets its own reminder and confirm button;
@@ -180,7 +245,15 @@ view, then open Rachel's view and check exactly what she can see and receive for
 - **Confirm tapped twice by accident in quick succession**: handled by Story 2 scenarios 2–5; a
   dose is never recorded twice without Harold confirming the second one.
 - **"Unsure" then later remembers**: Harold can confirm the dose afterwards; the record keeps
-  both the unsure mark and the confirmation time, and the flag stays visible.
+  both the unsure mark and the confirmation time, and the flag stays open until Dr. Nguyen
+  answers it (FR-027).
+- **Held dose passes its due time before advice arrives** (V2): it gets no reminder and no missed
+  flag while held. If the advice is not "Skip your next dose", the dose becomes due when the
+  advice is given and its window counts from then (team assumption).
+- **Advice on a flag whose dose was already confirmed** (e.g. unsure, then remembered): the advice
+  is still shown and resolves the flag; nothing new is recorded.
+- **Rachel and advice** (V2): Rachel never sees Dr. Nguyen's advice; for shared medications she
+  sees only name, due time and status (FR-022 and C2 unchanged).
 - **Window changed by Dr. Nguyen while a dose is pending**: the new window applies from the next
   due dose; the pending dose keeps the window it started with.
 - **Dose confirmed before the due time** (e.g. taken early before an appointment, T1:30): allowed
@@ -217,16 +290,18 @@ Each requirement lists its goal model reference and interview evidence (Constitu
 
 - **FR-007**: Harold MUST be able to mark a due dose as "I'm not sure" with a single tap.
   *(G-43; T1:44; F2:20, F2:22)*
-- **FR-008**: After an "unsure" mark, System MUST show the last-taken time for that medication
-  and advise Harold to wait until it is checked before taking another dose. *(G-43, G-17,
-  supports G-20; T1:44; F2:22)*
+- **FR-008** *(revised in V2)*: After an "unsure" mark, System MUST show the last-taken time for
+  that medication and "Please wait for Dr. Nguyen's advice before taking another.", hold the
+  medication's next dose until advice arrives (as in FR-009), and show the advice once Dr. Nguyen
+  answers (FR-026). *(G-43, G-17, G-20, G-19; T1:44; F2:22, F2:34)*
 - **FR-009**: When Harold tries to confirm a dose that is already recorded for that due time, or
   a medication that was confirmed less than 6 hours ago (team assumption), System MUST show the
   existing record's time and offer three choices: "Yes, I took another" (records a duplicate
   of the most recent confirmed dose, at the current time), "No, I tapped by mistake" (records
-  nothing) and "I'm not sure" (marks the most recent confirmed dose unsure, FR-007). In the
-  6-hour case the upcoming dose stays scheduled and still gets its reminder. *(G-22, G-17,
-  supports G-16; T2:14, T2:17)*
+  nothing) and "I'm not sure" (marks the most recent confirmed dose unsure, FR-007).
+  *Revised in V2:* after "Yes, I took another", the next dose of that medication MUST be held
+  until Dr. Nguyen's advice arrives: no reminder and no missed flag while held, and the card shows
+  "Waiting for Dr. Nguyen's advice". *(G-22, G-17, G-20, supports G-16; T2:14, T2:17; T1:44)*
 
 **Medication settings**
 
@@ -246,10 +321,13 @@ Each requirement lists its goal model reference and interview evidence (Constitu
 - **FR-014**: While a dose is unconfirmed inside its window, System MUST NOT flag it as missed or
   send a missed-dose alert. Duplicate and unsure flags are not delayed (FR-013). *(G-34; T1:46;
   F1:29, F1:49)*
-- **FR-015**: A dose confirmed after being flagged missed MUST be recorded as "taken late" with
-  its time; the flag MUST remain visible and sent alerts MUST NOT be withdrawn. For a high-risk
-  medication, System MUST first show "Check with Dr. Nguyen about this late dose" and MUST
-  NOT give dosing advice of its own. *(G-8, G-22, supports G-20; T3:55; T1:44; F2:26)*
+- **FR-015** *(revised in V2)*: A dose confirmed after being flagged missed MUST be recorded as
+  "taken late" with its time; the flag MUST remain visible and sent alerts MUST NOT be withdrawn.
+  For a high-risk medication, System MUST first show "This dose is late. Ask Dr. Nguyen before
+  taking it." with two choices: "Ask Dr. Nguyen" (records nothing; Harold waits for advice) and
+  "I already took it" (records "taken late"). Either choice MUST send Dr. Nguyen an urgent "advice
+  requested" alert for that flag, saying whether Harold has already taken it. *(G-8, G-22, G-19,
+  G-20; T3:55; T1:44; F2:26, F2:34)*
 
 **Alerts**
 
@@ -274,14 +352,37 @@ Each requirement lists its goal model reference and interview evidence (Constitu
   shared medications only, Rachel MUST see name, due time and current status. *(G-33; T1:28;
   F1:23)*
 
+**Advice and resolving flags (added in V2; FR-023 is retired and not reused)**
+
+- **FR-024**: Dr. Nguyen's view MUST list every open flag, missed, duplicate or unsure and of
+  either risk level, with medication, reason, dose time and the dose's record. Low-risk flags
+  appear in this list without an alert (FR-017 unchanged). *(G-19, G-18; F2:22, F2:34; listing
+  low-risk flags is a team assumption)*
+- **FR-025**: Dr. Nguyen MUST be able to answer any open flag by choosing one advice option from a
+  fixed list: "Take it now", "Skip your next dose", "Take your next dose as usual", "Please call
+  me". *(G-19; T1:44; F2:34; the list itself is a team assumption)*
+- **FR-026**: When advice is given, System MUST show it to Harold on that medication's card and as
+  a notice, worded as "Dr. Nguyen: <advice>", until he acknowledges it. *(G-19, G-20; T1:44)*
+- **FR-027**: When advice is given, System MUST mark the flag resolved with the advice and time
+  and lift any hold on that medication (FR-008, FR-009). "Skip your next dose" MUST mark the
+  medication's next dose skipped: no reminder and no missed flag. Resolved flags MUST stay visible
+  and alerts MUST NOT be withdrawn. *(G-18; T1:44; F2:22)*
+- **FR-028**: System MUST NOT give dosing advice of its own. While a flag awaits advice, Harold
+  sees only the waiting message; every dosing instruction comes from Dr. Nguyen's chosen option.
+  *(G-20, G-19; F2:26; T1:44)*
+
 ### Key Entities
 
 - **Medication**: one of Harold's prescribed medications. Attributes: name, scheduled due times,
   window length (minutes), risk level (high/low), shared-with-Rachel (yes/no).
 - **Dose**: one scheduled intake of a medication. Attributes: medication, due time, status (due,
-  taken, taken late, unsure, missed, duplicate), confirmation time(s), unsure mark.
+  taken, taken late, unsure, missed, duplicate; V2 adds held and skipped), confirmation time(s),
+  unsure mark.
 - **Flag**: a safety concern on a dose. Attributes: dose, reason (missed, duplicate, unsure),
-  raised time, risk level inherited from the medication.
+  raised time, risk level inherited from the medication; V2 adds open/resolved and the advice
+  that resolved it.
+- **Advice** (V2): Dr. Nguyen's answer to a flag. Attributes: flag, option from the fixed list,
+  time given, acknowledged by Harold (yes/no).
 - **Alert / Notice**: a message caused by a flag. Attributes: flag, recipient (Harold,
   Dr. Nguyen, Rachel), urgency (urgent or routine), content level (full details or
   "check in" only).
@@ -303,12 +404,12 @@ Carried from `docs/goal-model.md` §3–§4 (Constitution Principle III).
 | Overlap | G-7 requested by Harold, Rachel and Dr. Nguyen (T1:14; T2:22; T3:55) | Combined into one confirm action (FR-003). | — |
 | Overlap | G-4 and HW2 G-32 (stop reminder once confirmed) | Combined (FR-001, FR-002). | — |
 | Overlap | G-17 and G-43 both serve G-16 | Implemented separately (FR-005, FR-007/FR-008). | — |
+| V2 | G-19 and G-20 were OR-alternatives under G-18 (R12/R13) | One partial AND-refinement: Dr. Nguyen advises and Harold waits (FR-024–FR-028; goal model §6). | Open: what happens if Dr. Nguyen doesn't answer. |
 
-### Out of Scope (this sprint)
+### Out of Scope (V2)
 
 - Regimen and schedule changes by Harold or prescriber confirmation (G-9 vs. G-15).
-- Pharmacist advice workflow (G-19) and formally resolving an uncertain dose (G-18); this spec
-  only advises waiting (FR-008).
+- Free-text or two-way messaging with Dr. Nguyen; advice is limited to the fixed list (FR-025).
 - Rachel's full medication history (HW2 G-28).
 - Real notifications (SMS, email, push), real patient data, and health-record integration.
 
@@ -327,8 +428,11 @@ Carried from `docs/goal-model.md` §3–§4 (Constitution Principle III).
   shared, and safety-contact messages contain 0 medication details.
 - **SC-006**: All text in Harold's view is readable at arm's length on a tablet by a reader
   needing large print (body text at least 18 pt equivalent; tap targets at least 1.5 cm high).
-- **SC-007**: Every functional requirement FR-001–FR-022 can be traced to a goal ID and interview
-  evidence in `docs/traceability.md` and demonstrated through at least one acceptance scenario.
+- **SC-007**: Every functional requirement FR-001–FR-022 and FR-024–FR-028 can be traced to a goal
+  ID and interview evidence in `docs/traceability.md` and demonstrated through at least one
+  acceptance scenario.
+- **SC-008** (V2): In a walkthrough, 100% of flags can be resolved by Dr. Nguyen's advice, and 0
+  held doses produce a reminder or a missed flag before advice arrives.
 
 ## Assumptions
 
@@ -352,8 +456,14 @@ Carried from `docs/goal-model.md` §3–§4 (Constitution Principle III).
   validate with stakeholders.
 - A tap within 6 hours of the medication's last confirmation shows the FR-009 prompt; team
   assumption, to validate with stakeholders.
-- For a missed high-risk dose, "Check with Dr. Nguyen about this late dose" is shown before
-  recording (FR-015); team assumption, to validate with stakeholders.
+- For a missed high-risk dose, "This dose is late. Ask Dr. Nguyen before taking it." is shown
+  before recording (FR-015); team assumption, to validate with stakeholders.
+- Advice options are a fixed list: "Take it now", "Skip your next dose", "Take your next dose as
+  usual", "Please call me" (FR-025); team assumption, to validate with Dr. Nguyen.
+- An unsure mark also holds the next dose (FR-008), matching G-20 "dose withheld until advised";
+  team assumption, to validate.
+- **Open question (V2)**: if Dr. Nguyen doesn't answer, Harold keeps waiting and the held dose
+  stays held (G-20). What should happen? To ask Dr. Nguyen and Harold.
 - **Open question (for Dr. Nguyen)**: if a morning dose is taken late (e.g. 15:00), is the
   evening dose at 20:00 a duplicate risk? The 6-hour rule currently treats it as one.
 - **Open question (C2)**: whether an in-app opt-in counts as Harold's written consent for
@@ -366,3 +476,5 @@ Carried from `docs/goal-model.md` §3–§4 (Constitution Principle III).
   medication windows (FR-010).
 - Alert urgency (FR-016, FR-017) depends on risk levels (FR-010).
 - Anything Rachel receives (FR-021, FR-022) depends on Harold's consent settings (FR-020, FR-022).
+- V2: advice (FR-024, FR-025) depends on a flag existing (FR-012, FR-013, FR-015); showing and
+  resolving (FR-026, FR-027) depend on advice being given; holds (FR-008, FR-009) end with FR-027.

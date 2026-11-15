@@ -1,9 +1,10 @@
-# Requirements Traceability Matrix — Prototype V1
+# Requirements Traceability Matrix — Prototype V1 and V2
 
 Spec: [`spec.md`](../specs/001-dose-safety-alerts/spec.md) · Goal model: [`goal-model.md`](goal-model.md)
 
 Evidence codes: T1 Harold, T2 Rachel, T3 Dr. Nguyen, F1/F2 follow-ups. Code paths are relative to
-`frontend/src/`; tests are in `frontend/tests/domain/`. Status is based on our V1 walkthrough
+`frontend/src/`; tests are in `frontend/tests/domain/`. The first table describes V1 as tagged
+(`c20caf5`); V2 rows below point at the current code. Status is based on our V1 walkthrough
 of `quickstart.md`.
 
 | Requirement | Interview Evidence | Goal Model Reference | Code / Implementation | Status |
@@ -32,3 +33,24 @@ of `quickstart.md`.
 | FR-022 Share individual medications | T1:28; F1:23 | G-33 | `consent.ts` `setShared`, `rachelView` | Fully |
 
 **Summary:** 19 Fully, 3 Partially, 0 Not satisfied. All 41 domain tests pass.
+
+## V2 changes
+
+V2 revises FR-008, FR-009 and FR-015 and adds FR-024–FR-028 (goals G-18, G-19, G-20). FR-023 is
+retired and not reused. Rows above keep the V1 status; the V2 status is for the team's V2
+evaluation. Tests: `us6-advice.test.ts` (plus the updated US2-1 and M4 tests in
+`us2-unsure-duplicate.test.ts`).
+
+| Requirement | Interview Evidence | Goal Model Reference | Code / Implementation | V2 Status |
+|---|---|---|---|---|
+| FR-008 *(revised)* After unsure: last-taken time, "Please wait for Dr. Nguyen's advice before taking another.", next dose held, advice shown | T1:44; F2:22, F2:34 | G-43, G-17, G-20, G-19 | `views.ts` `waitingMessage`; `advice.ts` `heldDose`; `clock.ts` `tick` | To evaluate |
+| FR-009 *(revised)* After "Yes, I took another" the next dose is held: no reminder, no missed flag, "Waiting for Dr. Nguyen's advice" | T2:14, T2:17; T1:44 | G-22, G-17, G-20 (supports G-16) | `advice.ts` `heldDose`, `isHeldDose`; `clock.ts` `tick`; `views.ts` `statusLabelForHarold` | To evaluate |
+| FR-015 *(revised)* "This dose is late. Ask Dr. Nguyen before taking it."; both choices send an urgent advice request | T3:55; T1:44; F2:26, F2:34 | G-8, G-22, G-19, G-20 | `advice.ts` `respondToLateCheck`; `LateDoseDialog.tsx` | To evaluate |
+| FR-024 Dr. Nguyen lists every open flag (low-risk without an alert) | F2:22, F2:34 (low-risk listing: team assumption) | G-19, G-18 | `views.ts` `nguyenView` `openFlags`; `AdvicePanel.tsx` | To evaluate |
+| FR-025 Advice from a fixed list of four options | T1:44; F2:34 (list: team assumption) | G-19 | `types.ts` `AdviceOption`; `advice.ts` `giveAdvice`; `AdvicePanel.tsx` | To evaluate |
+| FR-026 "Dr. Nguyen: <advice>" on the card and as a notice until OK | T1:44 | G-19, G-20 | `views.ts` `adviceNotices`; `advice.ts` `acknowledgeAdvice`; `MedicationCard.tsx`, `HaroldView.tsx` | To evaluate |
+| FR-027 Advice resolves the flag, lifts the hold, "Skip your next dose" skips it; next confirm has no FR-009/FR-015 prompt | T1:44; F2:22 | G-18 | `advice.ts` `giveAdvice`, `advisedSinceLastConfirmation`; `doses.ts` `confirmDose` | To evaluate |
+| FR-028 No dosing advice from the app; only the waiting message while a flag awaits advice | F2:26; T1:44 | G-20, G-19 | `views.ts` `waitingMessage`; `LateDoseDialog.tsx` | To evaluate |
+
+**V2 checks:** 58 domain tests pass (41 V1, with US2-1 and M4 updated for the revised FR-008 and
+FR-009, plus 17 for US6), and all 30 local walkthrough checks pass (quickstart steps 1–27).

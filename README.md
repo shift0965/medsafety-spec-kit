@@ -5,7 +5,8 @@
 A prototype of the remind → confirm → record → flag → alert safety loop for Harold, his
 daughter Rachel and his pharmacist Dr. Nguyen. It covers dose confirmation and risk-based
 missed/duplicate-dose alerts (Sprint 1 goals G-4, G-7, G-8, G-17, G-43, G-38, G-22, G-24,
-G-25, G-34, G-33, G-42, G-36). It uses mock data only.
+G-25, G-34, G-33, G-42, G-36). V2 adds Dr. Nguyen's advice to resolve flagged doses (G-18,
+G-19, G-20). It uses mock data only.
 
 ## Deliverables
 

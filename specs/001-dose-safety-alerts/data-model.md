@@ -1,6 +1,6 @@
 # Data Model: Dose Confirmation and Risk-Based Alerts
 
-**Feature**: [spec.md](./spec.md) | **Date**: 2026-11-14
+**Feature**: [spec.md](./spec.md) | **Date**: 2026-11-14, V2 revision 2026-11-15
 
 All data is mock data held in app state (see [research.md](./research.md) R2). Times are
 simulated-clock times (R3).
@@ -43,9 +43,12 @@ One scheduled intake of a medication on a given day.
 | confirmations | datetime[] | each "I took it" time; length 2+ means duplicate (FR-009) |
 | unsureAt | datetime \| null | set by "I'm not sure" (FR-007) |
 | reminderShownAt | datetime \| null | set once; never re-set (FR-001) |
+| releasedAt | datetime \| null | V2: when a held dose was released after its due time; its window counts from here (R13) |
 
-Derived: `windowClosesAt = dueAt + windowMinutes`; `lastTakenAt` per medication = latest
-confirmation across its doses (FR-005).
+Derived: `windowClosesAt = (releasedAt ?? dueAt) + windowMinutes`; `lastTakenAt` per medication =
+latest confirmation across its doses (FR-005); V2 `heldDose(flag)` = while a `duplicate` or
+`unsure` flag is open, the first dose of that medication due after the flagged dose; only that
+dose is held (R11).
 
 ### Flag (G-22)
 
@@ -57,8 +60,25 @@ confirmation across its doses (FR-005).
 | raisedAt | datetime | |
 | riskLevel | `"high" \| "low"` | copied from dose |
 | note | string \| null | e.g. "taken late at 09:15" (FR-015) |
+| status | `"open" \| "resolved"` | V2: `open` until Dr. Nguyen gives advice (FR-027) |
+| resolvedAt | datetime \| null | V2 |
+| adviceRequestedAt | datetime \| null | V2: set by Harold's late-dose check (FR-015) |
+| takenBeforeRequest | boolean \| null | V2: "I already took it" (true) or "Ask Dr. Nguyen" (false) |
 
 At most one flag per (dose, reason).
+
+### Advice (V2; G-19, G-20)
+
+| Field | Type | Rules |
+|---|---|---|
+| id | string | |
+| flagId | string | → Flag; exactly one advice per resolved flag |
+| option | `"takeNow" \| "skipNextDose" \| "takeNextAsUsual" \| "callMe"` | fixed list (FR-025, team assumption) |
+| givenAt | datetime | |
+| acknowledged | boolean | Harold's notice shows until `true` (FR-026) |
+
+Display text: "Take it now", "Skip your next dose", "Take your next dose as usual",
+"Please call me", always shown as "Dr. Nguyen: <text>".
 
 ### Alert (G-24, G-25, G-42)
 
@@ -69,7 +89,8 @@ At most one flag per (dose, reason).
 | recipient | Person id | |
 | urgency | `"urgent" \| "routine"` | |
 | contentLevel | `"full" \| "checkInOnly"` | `checkInOnly` for Rachel as safety contact (FR-021) |
-| createdAt | datetime | = flag.raisedAt (R10) |
+| kind | `"flag" \| "adviceRequest"` | V2: `adviceRequest` = urgent alert to Dr. Nguyen from FR-015 |
+| createdAt | datetime | = flag.raisedAt (R10); for `adviceRequest`, the request time |
 | read | boolean | |
 
 Alerts are never deleted or withdrawn (FR-015).
@@ -101,10 +122,18 @@ Alerts are never deleted or withdrawn (FR-015).
  taken  ── confirm again + "I'm not sure" ───────────────────────────────────▶ unsure      [flag: unsure]
  unsure ── confirm ───────────────────────────────────────────────────────────▶ taken      (unsure flag kept)
  missed ── confirm ───────────────────────────────────────────────────────────▶ takenLate  (missed flag kept, note added;
-                                                                                   high risk: "Check with Dr. Nguyen" shown first)
+                                                                                   high risk: late check + advice request first)
+
+ V2 holds and advice (R11, R13):
+ scheduled ── dueAt reached while it is an open flag's heldDose ──────────────▶ held       (no reminder, no missed flag)
+ held / scheduled ── advice "Skip your next dose" ───────────────────────────▶ skipped    (no reminder, no missed flag)
+ held ── hold released, dueAt passed ───────────────────────────────────────▶ due        (releasedAt = now, reminder now)
+ held ── hold released, dueAt not passed ───────────────────────────────────▶ scheduled
 ```
 
-`DoseStatus = "scheduled" | "due" | "taken" | "takenLate" | "unsure" | "missed" | "duplicate"`
+`DoseStatus = "scheduled" | "due" | "taken" | "takenLate" | "unsure" | "missed" | "duplicate" | "held" | "skipped"`
+
+Flag: `open ── giveAdvice ──▶ resolved` (one-way; resolved flags and their alerts stay visible).
 
 **Early dose** (spec edge case, T1:30, T1:32): confirming before `dueAt` applies to the *next*
 due dose of that medication that has no confirmation (for twice-daily medications, the next of the
@@ -132,6 +161,12 @@ chosen in the FR-009 prompt) opens the FR-009 prompt again.
 | Early confirmation only when `now ≥ dueAt − 120 min` | Spec edge case (team assumption) |
 | Medication confirmed less than 6 h ago → FR-009 prompt, never a silent second record | FR-009 |
 | Window and risk are snapshotted when a dose leaves `scheduled` | FR-010, spec edge case |
+| V2: an open `duplicate`/`unsure` flag holds only the medication's next dose (`heldDose`): it becomes `held`, not `due`; later doses follow the V1 rules | FR-008, FR-009 |
+| V2: Dr. Nguyen's list shows every open flag (any reason, any risk); low-risk ones add no alert | FR-024, FR-017 |
+| V2: advice only on an `open` flag; it resolves the flag and releases that flag's held dose | FR-025, FR-027 |
+| V2: "Skip your next dose" skips the flag's `heldDose` (held or still scheduled) | FR-027 |
+| V2: late high-risk check (either choice) → one urgent `adviceRequest` alert to Dr. Nguyen | FR-015 |
+| V2: all dosing instructions come from an `Advice` record; the app's own text is only the waiting message | FR-028 |
 
 ## Seed data (mock)
 

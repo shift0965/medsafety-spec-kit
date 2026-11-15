@@ -1,6 +1,6 @@
 # Phase 0 Research: Dose Confirmation and Risk-Based Alerts
 
-**Feature**: [spec.md](./spec.md) | **Plan**: [plan.md](./plan.md) | **Date**: 2026-11-14
+**Feature**: [spec.md](./spec.md) | **Plan**: [plan.md](./plan.md) | **Date**: 2026-11-14, V2 additions R11–R14 2026-11-15
 
 The spec has no `[NEEDS CLARIFICATION]` markers. The unknowns below come from the Technical
 Context and the constitution's prototype constraints (Principle V).
@@ -100,3 +100,43 @@ Context and the constitution's prototype constraints (Principle V).
   duplicate/unsure.
 - **Rationale**: FR-016 requires urgent alerts at the moment the flag is raised; this avoids any
   delay that would blur the C1 decision.
+
+## V2 additions
+
+## R11. Representing a hold (FR-008, FR-009)
+
+- **Decision**: A hold is derived, not stored, and covers only the medication's **next** dose, as
+  FR-008 and FR-009 say. While a `duplicate` or `unsure` flag is open, the held dose is the first
+  dose of that medication due after the flagged dose. When `tick` would make that dose due, it
+  becomes `held` instead (no reminder, no missed flag). Later doses are not held and follow the V1
+  rules. Resolving the flag releases its held dose (R13).
+- **Rationale**: One source of truth (the flag) means a hold can never outlive its flag or be
+  forgotten. It also covers a next dose that doesn't exist yet (tomorrow's Warfarin).
+- **Alternatives considered**: A `holds` list or a per-dose flag (two things to keep in sync);
+  holding every later dose until advice (rejected: the spec holds only the next dose).
+
+## R12. Advice records and the fixed list (FR-025, FR-026, FR-027)
+
+- **Decision**: Advice is a separate `Advice` record (flag, option, time, acknowledged). The four
+  options are a TypeScript union. Only `skipNextDose` changes dose state; every option resolves
+  the flag and releases holds. Harold's advice notice is driven by `acknowledged`, not by alerts.
+- **Rationale**: Keeps the spec's fixed list (team assumption) explicit and testable; keeps alert
+  rules (FR-016, FR-017, invariant 7) unchanged.
+- **Alternatives considered**: Free text (out of scope in spec); reusing alerts for advice
+  (would mix FR-017 routing with advice display).
+
+## R13. A held dose released after its due time
+
+- **Decision**: On release, a held dose whose due time has passed becomes `due` with
+  `releasedAt = now` and a reminder at that time; its window counts from `releasedAt`. If the
+  due time has not passed, it goes back to `scheduled`.
+- **Rationale**: Implements the spec edge case (team assumption) and keeps FR-001's single
+  reminder.
+
+## R14. Advice requests for late high-risk doses (FR-015)
+
+- **Decision**: "Ask Dr. Nguyen" and "I already took it" both set `adviceRequestedAt` and
+  `takenBeforeRequest` on the missed flag and add one urgent alert to Dr. Nguyen with
+  `kind: "adviceRequest"`. Rachel gets nothing extra (C2 unchanged).
+- **Rationale**: Reuses the alert list and unread badge Dr. Nguyen already has; the request is
+  visible on the flag in her advice panel.

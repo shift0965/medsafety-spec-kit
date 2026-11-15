@@ -365,8 +365,9 @@ Each requirement lists its goal model reference and interview evidence (Constitu
   a notice, worded as "Dr. Nguyen: <advice>", until he acknowledges it. *(G-19, G-20; T1:44)*
 - **FR-027**: When advice is given, System MUST mark the flag resolved with the advice and time
   and lift any hold on that medication (FR-008, FR-009). "Skip your next dose" MUST mark the
-  medication's next dose skipped: no reminder and no missed flag. Resolved flags MUST stay visible
-  and alerts MUST NOT be withdrawn. *(G-18; T1:44; F2:22)*
+  medication's next dose skipped: no reminder and no missed flag. After advice, "I took it" MUST
+  record the dose directly, without the FR-015 prompt. Resolved flags MUST stay visible and alerts
+  MUST NOT be withdrawn. *(G-18; T1:44; F2:22)*
 - **FR-028**: System MUST NOT give dosing advice of its own. While a flag awaits advice, Harold
   sees only the waiting message; every dosing instruction comes from Dr. Nguyen's chosen option.
   *(G-20, G-19; F2:26; T1:44)*

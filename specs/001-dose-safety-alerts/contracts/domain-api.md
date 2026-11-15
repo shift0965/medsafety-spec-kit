@@ -12,7 +12,7 @@ current `AppState` and returns a new `AppState` (no mutation, no reading the dev
 | Function | Input | Effect | Errors / no-ops | FR |
 |---|---|---|---|---|
 | `tick(state, now)` | new simulated time | Sets clock; creates today's doses; marks doses `due` and sets `reminderShownAt` once at `dueAt` (V2: `held` instead, with no reminder, if the dose is an open flag's next dose, R11); raises `missed` flags (and their alerts) for `due` doses whose window closed (never for `held` or `skipped`) | `now` earlier than clock → no-op | FR-001, FR-008, FR-009, FR-012, FR-014, FR-016, FR-017, FR-021 |
-| `confirmDose(state, doseId)` | dose (scheduled, due, unsure or missed) | If the dose already has a confirmation, **or** the medication's latest confirmation is less than 6 h old: returns state unchanged plus `needsDuplicateChoice: true`. Otherwise records time, status `taken` (or `takenLate` if missed, adding the note "taken late at HH:MM" to the missed flag; an unsure dose becomes `taken` and keeps its unsure flag). A `scheduled` dose is an early dose: allowed only when `now ≥ dueAt − 120 min`, snapshots window/risk, status `taken`, no reminder later | unknown dose → error; early dose more than 120 min before `dueAt` → error | FR-002, FR-003, FR-004, FR-009, FR-015 |
+| `confirmDose(state, doseId)` | dose (scheduled, due, unsure or missed) | If the dose already has a confirmation, **or** the medication's latest confirmation is less than 6 h old: returns state unchanged plus `needsDuplicateChoice: true`. V2: both checks are skipped when advice was given on that medication after its latest confirmation (FR-027, `advisedSinceLastConfirmation`). Otherwise records time, status `taken` (or `takenLate` if missed, adding the note "taken late at HH:MM" to the missed flag; an unsure dose becomes `taken` and keeps its unsure flag). A `scheduled` dose is an early dose: allowed only when `now ≥ dueAt − 120 min`, snapshots window/risk, status `taken`, no reminder later | unknown dose → error; early dose more than 120 min before `dueAt` → error | FR-002, FR-003, FR-004, FR-009, FR-015 |
 | `resolveDuplicateChoice(state, doseId, choice)` | dose that triggered `needsDuplicateChoice`; `choice: "tookAnother" \| "mistake" \| "unsure"` | `tookAnother` → adds a confirmation to the medication's most recent confirmed dose, status `duplicate`, raises `duplicate` flag + alerts; `mistake` → no change; `unsure` → `markUnsure` on the most recent confirmed dose. The triggering dose is never changed (in the 6-hour case it stays `scheduled`) | dose that would not trigger the prompt → error | FR-009, FR-013 |
 | `markUnsure(state, doseId)` | due, taken or takenLate dose | Sets `unsureAt`, status `unsure`, raises `unsure` flag + alerts (keeps existing confirmations) | dose already unsure → no-op | FR-007, FR-008, FR-013 |
 | `setMedicationSettings(state, medId, {windowMinutes, riskLevel})` | Dr. Nguyen (pharmacist) input | Updates medication; doses still `scheduled` use the new values when they become due; doses that already left `scheduled` keep their snapshot | window outside 5–240 → error | FR-010, FR-011 |
@@ -20,7 +20,7 @@ current `AppState` and returns a new `AppState` (no mutation, no reading the dev
 | `setShared(state, medId, shared)` | Harold input | Sets `sharedWithRachel` | — | FR-022 |
 | `markAlertRead(state, alertId)` | recipient | Sets `read` | — | — |
 | `respondToLateCheck(state, doseId, choice)` *(V2)* | missed high-risk dose; `choice: "ask" \| "alreadyTook"` | `alreadyTook` → `confirmDose` (taken late). Both → set `adviceRequestedAt`/`takenBeforeRequest` on the missed flag and add one urgent `adviceRequest` alert to Dr. Nguyen | dose not missed or not high-risk → error; repeat request → no new alert | FR-015 |
-| `giveAdvice(state, flagId, option)` *(V2)* | open flag; option from the fixed list | Adds an `Advice`; flag → `resolved`; `skipNextDose` → skips the flag's next dose (`heldDose`, held or still scheduled); otherwise releases that dose if it is `held` (R13) | flag not open → error | FR-025, FR-027 |
+| `giveAdvice(state, flagId, option)` *(V2)* | open flag; option from the fixed list | Adds an `Advice`; flag → `resolved`; `skipNextDose` → skips the flag's next dose (`heldDose`, held or still scheduled); otherwise releases that dose if it is `held` and no other open flag holds it (R13) | flag not open → error | FR-025, FR-027 |
 | `acknowledgeAdvice(state, adviceId)` *(V2)* | Harold | Sets `acknowledged` | — | FR-026 |
 | `resetDemo()` | — | Returns seed state | — | — |
 
@@ -52,7 +52,8 @@ flag.riskLevel = low  → routine/full → Harold only
 6. `reminderShownAt` is set at most once per dose (FR-001).
 7. Alerts are never removed except by `resetDemo` (FR-015).
 8. A dose never gains a second confirmation, and no dose is confirmed within 6 h of the
-   medication's previous confirmation, except through `resolveDuplicateChoice` (FR-009).
+   medication's previous confirmation, except through `resolveDuplicateChoice` (FR-009) or after
+   advice given since that confirmation (V2, FR-027).
 9. A dose's `windowMinutes`/`riskLevel` never change after it leaves `scheduled` (spec edge case).
 10. *(V2)* No `held` or `skipped` dose has a missed flag, and no dose gets `reminderShownAt` while
     `held` (FR-009, FR-027).

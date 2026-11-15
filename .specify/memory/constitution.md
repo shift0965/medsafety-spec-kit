@@ -1,5 +1,12 @@
 <!--
 Sync Impact Report
+- Version change: 1.0.1 → 1.1.0 (MINOR, 2026-11-15)
+- Modified: Principle II scope expanded for V2: V2 may also build the goals in the goal model's
+  "Added in V2" table (G-18, G-19, G-20); G-19 removed from the out-of-scope example.
+- Templates: none modified
+- Deferred TODOs: none
+
+Previous report (1.0.1)
 - Version change: 1.0.0 → 1.0.1 (PATCH, 2026-11-14)
 - Modified: Principle V large-print bullet clarified ("confirm a due dose with a single tap");
   safety prompts for repeated doses (FR-009) and missed high-risk doses (FR-015) explicitly
@@ -47,9 +54,10 @@ requirements and code; an untraceable feature cannot be evaluated or defended.
 
 - Each prototype version MUST implement only the goals listed in the "Goals to build" table of
   that version's `docs/goal-model.md` (V1: G-4, G-7, G-8, G-17, G-43, G-38, G-22, G-24, G-25,
-  G-34, G-33, G-42, G-36).
-- Goals outside the sprint scope (e.g. regimen changes G-9/G-15, pharmacist advice G-19) MUST NOT
-  be implemented, even if an agent proposes them.
+  G-34, G-33, G-42, G-36). V2 MAY also build the goals in the goal model's "Added in V2" table
+  (G-18, G-19, G-20), chosen from the V1 evaluation.
+- Goals outside the sprint scope (e.g. regimen changes G-9/G-15) MUST NOT be implemented, even if
+  an agent proposes them.
 - Any "additional need" an agent or developer anticipates MUST be recorded as an assumption or
   open question in the spec and validated by the team before it is built.
 
@@ -139,4 +147,4 @@ prototypes keep effort on stakeholder goals.
 - Compliance is reviewed at each Spec Kit gate (plan Constitution Check, `/speckit-analyze`)
   and before tagging V1 and V2. Violations MUST be fixed or explicitly justified in the plan.
 
-**Version**: 1.0.1 | **Ratified**: 2026-11-14 | **Last Amended**: 2026-11-14
+**Version**: 1.1.0 | **Ratified**: 2026-11-14 | **Last Amended**: 2026-11-15

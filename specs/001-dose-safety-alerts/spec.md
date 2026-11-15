@@ -366,10 +366,13 @@ Each requirement lists its goal model reference and interview evidence (Constitu
 - **FR-027**: When advice is given, System MUST mark the flag resolved with the advice and time
   and lift any hold on that medication (FR-008, FR-009). "Skip your next dose" MUST mark the
   medication's next dose skipped: no reminder and no missed flag. After advice, "I took it" MUST
-  record the dose directly, without the FR-015 prompt. Resolved flags MUST stay visible and alerts
+  record the dose directly, without the FR-015 or FR-009 prompt (team assumption: Dr. Nguyen has
+  already seen the record). Resolved flags MUST stay visible and alerts
   MUST NOT be withdrawn. *(G-18; T1:44; F2:22)*
-- **FR-028**: System MUST NOT give dosing advice of its own. While a flag awaits advice, Harold
-  sees only the waiting message; every dosing instruction comes from Dr. Nguyen's chosen option.
+- **FR-028**: System MUST NOT give dosing advice of its own. While an unsure or duplicate flag
+  awaits advice, or after "Ask Dr. Nguyen", Harold sees only the waiting message; an open missed
+  flag shows only its status (e.g. "Missed", "Taken late at 09:15"). Every dosing instruction
+  comes from Dr. Nguyen's chosen option.
   *(G-20, G-19; F2:26; T1:44)*
 
 ### Key Entities
@@ -463,6 +466,9 @@ Carried from `docs/goal-model.md` §3–§4 (Constitution Principle III).
   usual", "Please call me" (FR-025); team assumption, to validate with Dr. Nguyen.
 - An unsure mark also holds the next dose (FR-008), matching G-20 "dose withheld until advised";
   team assumption, to validate.
+- Every advice option, including "Please call me", resolves the flag and lifts the hold
+  (FR-027); team assumption. **Open question (V2)**: should "Please call me" keep the next dose
+  held until the call? To ask Dr. Nguyen.
 - **Open question (V2)**: if Dr. Nguyen doesn't answer, Harold keeps waiting and the held dose
   stays held (G-20). What should happen? To ask Dr. Nguyen and Harold.
 - **Open question (for Dr. Nguyen)**: if a morning dose is taken late (e.g. 15:00), is the

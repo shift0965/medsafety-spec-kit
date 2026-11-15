@@ -163,7 +163,8 @@ chosen in the FR-009 prompt) opens the FR-009 prompt again.
 | Window and risk are snapshotted when a dose leaves `scheduled` | FR-010, spec edge case |
 | V2: an open `duplicate`/`unsure` flag holds only the medication's next dose (`heldDose`): it becomes `held`, not `due`; later doses follow the V1 rules | FR-008, FR-009 |
 | V2: Dr. Nguyen's list shows every open flag (any reason, any risk); low-risk ones add no alert | FR-024, FR-017 |
-| V2: advice only on an `open` flag; it resolves the flag and releases that flag's held dose | FR-025, FR-027 |
+| V2: advice only on an `open` flag; it resolves the flag and releases that flag's held dose unless another open flag holds it | FR-025, FR-027 |
+| V2: after advice given since the medication's latest confirmation, the next confirm skips the FR-009 and FR-015 prompts | FR-027 |
 | V2: "Skip your next dose" skips the flag's `heldDose` (held or still scheduled) | FR-027 |
 | V2: late high-risk check (either choice) → one urgent `adviceRequest` alert to Dr. Nguyen | FR-015 |
 | V2: all dosing instructions come from an `Advice` record; the app's own text is only the waiting message | FR-028 |

@@ -108,7 +108,8 @@ Steps marked *(V2)* changed in the V2 revision; section F is new in V2.
     "Skipped (Dr. Nguyen's advice)"; advance to 22:00: still no missed flag; the duplicate flag is
     resolved. → US6-4
 25. Reset and repeat step 23 up to 18:30. Advance to 19:00 and, in Dr. Nguyen's view, choose **Take
-    your next dose as usual**. Advance to 20:00: "Time for your Metoprolol" appears. → US6-5
+    your next dose as usual**. Advance to 20:00: "Time for your Metoprolol" appears; tap **I took it**:
+    it is recorded with no "You recorded this at…" dialog. → US6-5, FR-027
 26. Reset. Advance to 09:15, tap **I took it** on Warfarin and choose **Ask Dr. Nguyen**. Nothing is
     recorded; the card shows "Please wait for Dr. Nguyen's advice before taking it."; Dr. Nguyen has
     an urgent "advice requested" alert; Rachel's view is unchanged. → US6-6, US6-8

@@ -1,24 +1,24 @@
 # Learning Log
 
-## Sprint planning
+## Sprint Planning and Requirements Selection
 
 For V1 we built one loop: remind Harold, let him confirm, save the time, flag a problem, and alert the right person. We picked this because it is the main safety feature. Harold went to hospital after taking his blood thinner twice, and Harold, Rachel and Dr. Nguyen all said dose safety matters most. The loop has a one-tap confirm, a "last taken at" time, and an "I'm not sure" button so Harold doesn't take a dose twice. Dr. Nguyen sets a time window and a risk level for each medication, so the app knows when a dose is missed and how urgent it is. Rachel only sees what Harold agrees to share, and text and buttons are large. It is also the part with the most unknowns, so V1 was a good way to test our ideas early.
 
-We had to settle a few disagreements first. Rachel wanted every problem sent to her right away, but Harold didn't want her told when he was just a few minutes late. We followed Dr. Nguyen, who said it depends on the drug: high-risk problems send an urgent alert to Harold and Dr. Nguyen, and low-risk ones are just a note to Harold. Rachel also needs warnings, but she can only be told with Harold's consent, so she gets nothing by default unless Harold makes her his safety contact or shares a medication with her. Everyone also meant something different by "missed", so each medication got its own window. The goal model helped here because it showed which goals depend on each other and where the conflicts were, so we made these choices ourselves before writing the spec. We left out changing the schedule, pharmacist advice, Rachel seeing the full history, and real notifications, because they aren't part of the double-dose loop.
+Some goals overlapped, so we merged them: all three stakeholders asked for one-tap confirm, so it became one goal, and the reminder and "stop the reminder once confirmed" became one. We also had to settle a few disagreements. Rachel wanted every problem sent to her right away, but Harold didn't want her told when he was just a few minutes late. We followed Dr. Nguyen, who said it depends on the drug: high-risk problems send an urgent alert to Harold and Dr. Nguyen, and low-risk ones are just a note to Harold. Rachel also needs warnings, but she can only be told with Harold's consent, so she gets nothing by default unless Harold makes her his safety contact or shares a medication with her. Everyone also meant something different by "missed", so each medication got its own window. The goal model helped here because it showed which goals depend on each other and where the conflicts were, so we made these choices ourselves before writing the spec. We left out changing the schedule, pharmacist advice, Rachel seeing the full history, and real notifications, because they aren't part of the double-dose loop.
 
-## What we found in V1
+## Prototype Evaluation
 
 When we clicked through V1, the problems we found came from the spec, not from bugs in the code. The main ones were:
 
-1. After "I'm not sure", Harold was told to wait even when there was no record of the dose, and no one could ever answer him.
-2. After "Yes, I took another", he still got a reminder for the next dose, which invites a third dose, and then a false missed alert.
-3. For a late dose he was told to "check with Dr. Nguyen", but he had no way to reach her and she was never asked.
+1. After "I'm not sure", Harold was told to wait even when there was no record of the dose, and no one could ever answer him. This needs a spec change and a new goal, so that someone can actually give advice.
+2. After "Yes, I took another", he still got a reminder for the next dose, which invites a third dose, and then a false missed alert. This needs a spec change to hold the next dose.
+3. For a late dose he was told to "check with Dr. Nguyen", but he had no way to reach her and she was never asked. This needs a spec change, and a question for the stakeholders about how Harold should reach her.
 
 All three have the same cause: V1 could raise a safety flag but never close it.
 
-## What we changed in V2
+## Revisions and Learning
 
-V2 fixes these 3 problems. Now when Harold says "I'm not sure", takes a dose twice, or is late with an important dose, his next dose is put on hold and Dr. Nguyen gets a request for advice. She sees every open problem and answers with one of four set options, like "Take it now" or "Skip your next dose". Harold sees her answer on his screen, and that closes the problem and releases the next dose. While he waits, the app only says "Please wait for Dr. Nguyen's advice", because the app should never give dosing advice itself. To do this we brought pharmacist advice back into scope, which the interviews support (Harold says he will "wait for proper advice"), and we updated our project rules, which had said not to build it. We kept the same design and tools and only added what was needed.
+V2 fixes these 3 problems. Now when Harold says "I'm not sure", takes a dose twice, or is late with an important dose, his next dose is put on hold and Dr. Nguyen gets a request for advice. She sees every open problem and answers with one of four set options, like "Take it now" or "Skip your next dose". Harold sees her answer on his screen, and that closes the problem and releases the next dose. While he waits, the app only says "Please wait for Dr. Nguyen's advice", because the app should never give dosing advice itself. To do this we brought pharmacist advice back into scope, which the interviews support (Harold says he will "wait for proper advice"), and we updated our project rules, which had said not to build it. We kept the same design and tools and only added what was needed. After V2, 26 requirements are fully met and 1 is partly met, up from 19 fully met in V1. The one left is "Please call me", which releases the next dose before any call happens, and we still don't know what should happen if Dr. Nguyen never answers.
 
 ## Reflection
 

@@ -1,6 +1,6 @@
 # Feature Specification: Dose Confirmation and Risk-Based Missed/Duplicate-Dose Alerts
 
-**Feature Branch**: `001-dose-safety-alerts`
+**Feature Branch**: `main` (spec folder `001-dose-safety-alerts`)
 
 **Created**: 2026-11-14
 
@@ -11,7 +11,7 @@ flag and alert safety loop — G-4, G-7, G-8, G-17, G-43, G-38, G-22, G-24, G-25
 G-36."
 
 **Source model**: `docs/goal-model.md` (Sprint 1, V1). Evidence codes refer to the interview
-transcripts (T1 Harold, T2 Rachel, T3 Dr. Nguyen) and follow-up notes (F1, F2).
+transcripts (T1 Harold, T2 Rachel, T3 Dr. Nguyen) and follow-up interviews (F1 Harold, F2 Rachel).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -66,12 +66,14 @@ shown.
    **Then** the dose is marked unsure, flagged immediately, and Harold sees the last-taken time
    and a message advising him to wait until it is checked before taking another.
 2. **Given** today's Warfarin dose was recorded at 08:04, **When** Harold taps to confirm
-   Warfarin again, **Then** the app shows "You recorded this at 08:04" and asks him to confirm
-   he took another one.
-3. **Given** the prompt in scenario 2 is showing, **When** Harold confirms he took another,
+   Warfarin again, **Then** the app shows "You recorded this at 08:04" with three choices:
+   "Yes, I took another", "No, I tapped by mistake" and "I'm not sure".
+3. **Given** the prompt in scenario 2 is showing, **When** Harold chooses "Yes, I took another",
    **Then** the second dose is recorded and flagged immediately as a duplicate.
-4. **Given** the prompt in scenario 2 is showing, **When** Harold cancels, **Then** nothing new
-   is recorded and no flag is raised.
+4. **Given** the prompt in scenario 2 is showing, **When** Harold chooses "No, I tapped by
+   mistake", **Then** nothing new is recorded and no flag is raised.
+5. **Given** the prompt in scenario 2 is showing, **When** Harold chooses "I'm not sure",
+   **Then** the dose is marked unsure and flagged immediately, as in scenario 1.
 
 ---
 
@@ -90,12 +92,13 @@ that the new values appear in the medication list and are used for the next due 
 
 **Acceptance Scenarios**:
 
-1. **Given** Dr. Nguyen's view lists Harold's medications, **When** she sets Levothyroxine to a
-   30-minute window and low risk, **Then** those values are saved and shown for Levothyroxine.
-2. **Given** she sets Warfarin to high risk, **When** a Warfarin dose is later flagged, **Then**
-   the flag is treated as high-risk (see Story 4).
+1. **Given** Dr. Nguyen's view lists Harold's medications, **When** Dr. Nguyen sets
+   Levothyroxine to a 30-minute window and low risk, **Then** those values are saved and shown
+   for Levothyroxine.
+2. **Given** Dr. Nguyen sets Warfarin to high risk, **When** a Warfarin dose is later flagged,
+   **Then** the flag is treated as high-risk (see Story 4).
 3. **Given** a medication has no window or risk set, **When** it is displayed, **Then** it uses
-   the default (60-minute window, low risk) and the default is visibly indicated.
+   the default (60-minute window, high risk) and the default is visibly indicated.
 
 ---
 
@@ -128,9 +131,12 @@ while still inside the window.
    receive no alert.
 4. **Given** a duplicate or unsure flag on a high-risk medication (Story 2), **When** the flag is
    raised, **Then** the urgent alert is sent immediately, without waiting for the window to close.
-5. **Given** Warfarin was flagged missed at 09:00, **When** Harold confirms it at 09:15, **Then**
-   the dose is recorded as "taken late" at 09:15, the flag remains visible with that note, and
-   already-sent alerts are not withdrawn.
+5. **Given** Warfarin (high risk) was flagged missed at 09:00, **When** Harold opens it to
+   confirm, **Then** the app first shows "Check with Dr. Nguyen about this late dose" and
+   gives no dosing advice of its own.
+6. **Given** the message in scenario 5 was shown, **When** Harold confirms Warfarin at 09:15,
+   **Then** the dose is recorded as "taken late" at 09:15, the flag remains visible with that
+   note, and already-sent alerts are not withdrawn.
 
 ---
 
@@ -171,14 +177,15 @@ view, then open Rachel's view and check exactly what she can see and receive for
 
 - **Two medications due at the same time**: each gets its own reminder and confirm button;
   confirming one does not confirm the other.
-- **Confirm tapped twice by accident in quick succession**: handled by Story 2 scenario 2–4; a
+- **Confirm tapped twice by accident in quick succession**: handled by Story 2 scenarios 2–5; a
   dose is never recorded twice without Harold confirming the second one.
 - **"Unsure" then later remembers**: Harold can confirm the dose afterwards; the record keeps
   both the unsure mark and the confirmation time, and the flag stays visible.
 - **Window changed by Dr. Nguyen while a dose is pending**: the new window applies from the next
   due dose; the pending dose keeps the window it started with.
-- **Dose confirmed before the due time** (e.g. taken early): recorded with the actual time; it
-  counts as that day's dose and no reminder is shown.
+- **Dose confirmed before the due time** (e.g. taken early before an appointment, T1:30):
+  recorded with the actual time; it counts as the next due dose of that medication (some are
+  taken twice a day, T1:32), and no reminder is shown for that dose.
 - **Rachel is safety contact and the medication is also shared**: she gets the "please check in"
   message on a high-risk flag and can see that medication's status in her view.
 - **Medication not shared but flagged low-risk**: Rachel sees and receives nothing.
@@ -209,17 +216,20 @@ Each requirement lists its goal model reference and interview evidence (Constitu
   *(G-43; T1:44; F2:20, F2:22)*
 - **FR-008**: After an "unsure" mark, System MUST show the last-taken time for that medication
   and advise Harold to wait until it is checked before taking another dose. *(G-43, G-17,
-  supports G-20; C3)*
+  supports G-20; T1:44; F2:22)*
 - **FR-009**: When Harold tries to confirm a dose that is already recorded for that due time,
-  System MUST show the existing record's time and require an explicit second confirmation
-  before recording another dose. *(G-22, G-17, supports G-16; T2:14)*
+  System MUST show the existing record's time and offer three choices: "Yes, I took another"
+  (records a second dose), "No, I tapped by mistake" (records nothing) and "I'm not sure"
+  (marks the dose unsure, FR-007). *(G-22, G-17, supports G-16; T2:14, T2:17)*
 
 **Medication settings**
 
 - **FR-010**: Dr. Nguyen MUST be able to set, per medication, a window (minutes after due time)
   and a risk level of high or low. *(G-38; T3:39, T3:59, T3:70)*
-- **FR-011**: Medications without settings MUST use a default of a 60-minute window and low risk,
-  and the default MUST be visibly indicated in Dr. Nguyen's view. *(G-38; assumption)*
+- **FR-011**: Medications without settings MUST use a default of a 60-minute window and high
+  risk, and the default MUST be visibly indicated in Dr. Nguyen's view. *(G-38; team
+  assumption, no transcript evidence: an unset medication is treated as high risk so that a
+  setup gap over-alerts rather than missing a dangerous dose)*
 
 **Flagging**
 
@@ -227,10 +237,13 @@ Each requirement lists its goal model reference and interview evidence (Constitu
   confirmation or unsure mark. *(G-22; T2:17; T3:57, T3:70; C3)*
 - **FR-013**: System MUST flag a dose immediately when it is recorded twice (FR-009) or marked
   unsure (FR-007). *(G-22; T2:14; T3:88; C3)*
-- **FR-014**: System MUST NOT flag a dose or send any alert while the dose is still inside its
-  window. *(G-34; T1:46; F1:29, F1:49)*
+- **FR-014**: While a dose is unconfirmed inside its window, System MUST NOT flag it as missed or
+  send a missed-dose alert. Duplicate and unsure flags are not delayed (FR-013). *(G-34; T1:46;
+  F1:29, F1:49)*
 - **FR-015**: A dose confirmed after being flagged missed MUST be recorded as "taken late" with
-  its time; the flag MUST remain visible and sent alerts MUST NOT be withdrawn. *(G-8, G-22)*
+  its time; the flag MUST remain visible and sent alerts MUST NOT be withdrawn. For a high-risk
+  medication, System MUST first show "Check with Dr. Nguyen about this late dose" and MUST
+  NOT give dosing advice of its own. *(G-8, G-22, supports G-20; T3:55; T1:44; F2:26)*
 
 **Alerts**
 
@@ -254,8 +267,6 @@ Each requirement lists its goal model reference and interview evidence (Constitu
 - **FR-022**: Harold MUST be able to share and un-share individual medications with Rachel; for
   shared medications only, Rachel MUST see name, due time and current status. *(G-33; T1:28;
   F1:23)*
-- **FR-023**: System MUST NOT send Rachel an alert for low-risk flags, even on shared
-  medications; the status is visible in her view only. *(G-34, G-25; T1:46; F1:29)*
 
 ### Key Entities
 
@@ -270,8 +281,8 @@ Each requirement lists its goal model reference and interview evidence (Constitu
   "check in" only).
 - **Consent settings**: Harold's choices: Rachel designated as safety contact (yes/no) and the
   set of medications shared with her.
-- **Person / role**: Harold (patient), Rachel (daughter, family member), Dr. Nguyen (prescriber
-  and pharmacist contact).
+- **Person / role**: Harold (patient), Rachel (daughter, family member), Dr. Nguyen (community
+  pharmacist, T3:4).
 
 ### Conflict and Overlap Decisions
 
@@ -280,7 +291,7 @@ Carried from `docs/goal-model.md` §3–§4 (Constitution Principle III).
 | ID | Relationship | Decision in this spec | Rejected / open |
 |---|---|---|---|
 | C1 | G-26 (alert Rachel on every flag) vs. G-34 (no alert when slightly late) | Alerts by urgency: high-risk → urgent (FR-016), low-risk → routine notice to Harold (FR-017); nothing inside window (FR-014). | G-26 kept as rejected alternative. |
-| C2 | G-24 (alert Rachel) vs. G-30 (no family access without consent) | Consent is a hard constraint: tiered access (FR-019–FR-023); Harold and Dr. Nguyen always get urgent alerts. | Open: does in-app opt-in count as written consent? |
+| C2 | G-24 (alert Rachel) vs. G-30 (no family access without consent) | Consent is a hard constraint: tiered access (FR-019–FR-022); Harold and Dr. Nguyen always get urgent alerts. | Open: does in-app opt-in count as written consent? |
 | C3 | Definition of "missed" (G-22) | Per-medication window + risk (FR-010); missed on window close (FR-012); duplicate/unsure immediately (FR-013). | — |
 | Trade-off | G-22 (flagging) vs. G-31 (Harold's independence) | Single non-repeating reminder, no flag inside window, neutral wording (FR-001, FR-014). | — |
 | Overlap | G-7 requested by Harold, Rachel and Dr. Nguyen (T1:14; T2:22; T3:55) | Combined into one confirm action (FR-003). | — |
@@ -310,7 +321,7 @@ Carried from `docs/goal-model.md` §3–§4 (Constitution Principle III).
   shared, and safety-contact messages contain 0 medication details.
 - **SC-006**: All text in Harold's view is readable at arm's length on a tablet by a reader
   needing large print (body text at least 18 pt equivalent; tap targets at least 1.5 cm high).
-- **SC-007**: Every functional requirement FR-001–FR-023 can be traced to a goal ID and interview
+- **SC-007**: Every functional requirement FR-001–FR-022 can be traced to a goal ID and interview
   evidence in `docs/traceability.md` and demonstrated through at least one acceptance scenario.
 
 ## Assumptions
@@ -319,16 +330,18 @@ Carried from `docs/goal-model.md` §3–§4 (Constitution Principle III).
   statin).
 - The app cannot observe meals, so food-relative windows (e.g. thyroid 30 minutes before food,
   T3:70) are approximated with clock-time windows.
-- Default window is 60 minutes and default risk is low when Dr. Nguyen has not set values.
+- Default window is 60 minutes and default risk is high when Dr. Nguyen has not set values
+  (team assumption, FR-011).
 - The prototype uses mock data for one patient (Harold), one family member (Rachel) and one
-  prescriber (Dr. Nguyen), with a few representative medications.
+  pharmacist (Dr. Nguyen), with a few representative medications.
 - Users switch between Harold's, Rachel's and Dr. Nguyen's views without real sign-in; alerts are
   shown in each person's view rather than delivered through real messaging.
 - Evaluators can simulate the passage of time so windows can close during a demonstration.
 - Recording is per medication, so it works whether Harold uses bottles, an organizer or blister
   packs (T1:25; T2:8; T3:4). How Harold stores his pills remains an open question.
-- Asking Harold to confirm a second dose before recording it (FR-009) is a team decision to avoid
-  false duplicate alarms from accidental taps; it is to be validated with stakeholders.
+- Asking Harold to choose between "took another", "tapped by mistake" and "not sure" before
+  recording a second dose (FR-009) is a team decision to avoid false duplicate alarms from
+  accidental taps without hiding real uncertainty; it is to be validated with stakeholders.
 - **Open question (C2)**: whether an in-app opt-in counts as Harold's written consent for
   Rachel. To ask Dr. Nguyen and Harold. The prototype treats the in-app toggle as consent for
   demonstration only.
@@ -338,4 +351,4 @@ Carried from `docs/goal-model.md` §3–§4 (Constitution Principle III).
 - Flagging (FR-012, FR-013) depends on confirmation records (FR-004), unsure marks (FR-007) and
   medication windows (FR-010).
 - Alert urgency (FR-016, FR-017) depends on risk levels (FR-010).
-- Anything Rachel receives (FR-021–FR-023) depends on Harold's consent settings (FR-020, FR-022).
+- Anything Rachel receives (FR-021, FR-022) depends on Harold's consent settings (FR-020, FR-022).

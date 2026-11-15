@@ -1,6 +1,6 @@
 ---
 
-description: "Task list for Dose Confirmation and Risk-Based Missed/Duplicate-Dose Alerts (V1)"
+description: "Task list for Dose Confirmation and Risk-Based Missed/Duplicate-Dose Alerts (V1 and V2)"
 ---
 
 # Tasks: Dose Confirmation and Risk-Based Missed/Duplicate-Dose Alerts
@@ -25,7 +25,7 @@ own.
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: Can run in parallel (different files, no dependencies on incomplete tasks)
-- **[Story]**: User story the task belongs to (US1–US5)
+- **[Story]**: User story the task belongs to (US1–US6)
 - All paths are relative to the repository root
 
 ---
@@ -184,7 +184,73 @@ own.
 - [ ] T047 Deploy `frontend/dist` as a static site (project root `frontend/`, build command `npm run build`, output `dist`; research R9) and note the V1 URL
 - [ ] T048 Replace the "Prototype V1 URL" `TODO` in `README.md` with the deployed URL
 - [ ] T049 Walk through all steps of `specs/001-dose-safety-alerts/quickstart.md` against the deployed URL; fix and redeploy if any step fails
-- [ ] T050 Tag `v1` (`git tag v1 && git push origin v1`) and replace the "GitHub Version 1" `TODO` in `README.md` with the link to the tag
+- [ ] T050 Tag `v1` at the V1 commit (`git tag v1 c20caf5 && git push origin v1`) and replace the "GitHub Version 1" `TODO` in `README.md` with the link to the tag
+
+---
+
+# V2 revision (G-18, G-19, G-20)
+
+**Input**: V2 changes in [spec.md](./spec.md) (FR-008, FR-009, FR-015 revised; FR-024–FR-028;
+User Story 6) and research R11–R14. V1 tasks above stay as history; V2 keeps the V1 stack and
+adds only what V2 needs.
+
+**Prerequisite**: V1 is deployed and tagged (T047–T050) before any V2 code is committed, so the
+V1 URL and `v1` tag keep showing V1.
+
+---
+
+## Phase 9: V2 Foundational (Blocking Prerequisites)
+
+**Purpose**: New fields and the advice record that every V2 task uses.
+
+- [ ] T051 Extend `frontend/src/domain/types.ts` per data-model.md: `DoseStatus` adds `"held" | "skipped"`; `Dose` adds `releasedAt: string | null` ("when a held dose was released after its due time; its window counts from here"); `Flag` adds `status: "open" | "resolved"`, `resolvedAt: string | null`, `adviceRequestedAt: string | null`, `takenBeforeRequest: boolean | null`; new `AdviceOption = "takeNow" | "skipNextDose" | "takeNextAsUsual" | "callMe"` and `Advice { id, flagId, option, givenAt, acknowledged: boolean }` ("exactly one advice per resolved flag"); `Alert` adds `kind: "flag" | "adviceRequest"`; `AppState` adds `advice: Advice[]`. Export `ADVICE_TEXT` mapping the options to "Take it now", "Skip your next dose", "Take your next dose as usual", "Please call me" (FR-025)
+- [ ] T052 Fill the new fields where records are created: `createSeedState` in `frontend/src/domain/seed.ts` (`advice: []`), `ensureDosesForDay` in `frontend/src/domain/doses.ts` (`releasedAt: null`), `raiseFlag` in `frontend/src/domain/flags.ts` (`status: "open"`, other new fields `null`), `routeFlag` in `frontend/src/domain/alerts.ts` (`kind: "flag"`); change `windowClosesAt` in `frontend/src/domain/doses.ts` to `(releasedAt ?? dueAt) + windowMinutes` (R13)
+- [ ] T053 Change `STORAGE_KEY` in `frontend/src/state/store.tsx` to `"medsafety-v2"` so a browser that ran V1 starts from the seed instead of loading state without the V2 fields
+- [ ] T054 Run `npm test` in `frontend/`: all 41 V1 tests still pass before US6 work starts
+
+**Checkpoint**: V1 behaviour unchanged; types compile.
+
+---
+
+## Phase 10: User Story 6 - Dr. Nguyen's advice resolves a flagged dose (Priority: P1, V2) 🎯
+
+**Goal**: Holds, advice requests, advice and resolved flags (G-18, G-19, G-20).
+
+**Independent Test**: Raise an unsure flag and a duplicate flag, answer both in Dr. Nguyen's view;
+Harold sees the advice, the flags show as resolved, and the held dose is released or skipped as
+advised (quickstart section F, steps 21–27).
+
+### Tests for User Story 6
+
+- [ ] T055 [US6] Add invariants 10–13 from contracts/domain-api.md to `expectInvariants` in `frontend/tests/domain/helpers.ts`: 10 no `held`/`skipped` dose has a missed flag and no dose gets `reminderShownAt` while `held`; 11 while a `duplicate`/`unsure` flag is open, the medication's next dose after the flagged one is never `due` once its due time is reached, and no other dose is `held`; 12 every `resolved` flag has exactly one `Advice` and every `Advice` belongs to a flag that was open when given; 13 no `rachel` alert has `kind: "adviceRequest"` and `rachelView` contains no advice
+- [ ] T056 [US6] Write `frontend/tests/domain/us6-advice.test.ts` (fails until T057–T061 exist): US6-1 / FR-008, FR-024, FR-028 Levothyroxine unsure at 07:05 → `haroldView` card shows the last-taken line and "Please wait for Dr. Nguyen's advice before taking another." as its only instruction, `nguyenView.openFlags` lists it, no `nguyen` alert; US6-2 / FR-025–FR-027 `giveAdvice(..., "takeNow")` → flag `resolved` with `resolvedAt`, one `Advice`, card and notice show "Dr. Nguyen: Take it now" until `acknowledgeAdvice`; US6-3 / FR-009 Metoprolol 08:00 confirmed at 15:00, "Yes, I took another" at 18:30 → at 20:00 the 20:00 dose is `held`, no `reminderShownAt`, card shows "Waiting for Dr. Nguyen's advice"; at 21:00 no missed flag; US6-4 "Skip your next dose" → 20:00 dose `skipped`, no reminder or missed flag by 22:00, flag resolved; US6-5 "Take your next dose as usual" at 19:00 → 20:00 dose `due` with a reminder at 20:00; US6-6 / FR-015 Warfarin missed at 09:00, `respondToLateCheck(..., "ask")` at 09:15 → nothing recorded, one urgent `adviceRequest` alert to `nguyen` with `takenBeforeRequest: false`, no new `rachel` alert even with safety contact on, card shows "Please wait for Dr. Nguyen's advice before taking it."; a repeat request adds no alert; `"alreadyTook"` records `takenLate` and sets `takenBeforeRequest: true`; US6-7 / FR-027 resolved flags and all earlier alerts are still present; US6-8 / FR-028 while any flag is open no card text contains "take", "skip" or "double" except the waiting message; FR-027 after "Take it now" on the missed Warfarin flag, `needsLateCheck` is false and `confirmDose` records `takenLate` directly; R11 only the next dose is held: after a Metoprolol duplicate, tomorrow's 08:00 dose is not `held` when `ensureDosesForDay` creates it while the 20:00 dose is still held; R13 edge case: advice at 20:30 on a held 20:00 dose → `due`, `releasedAt` 20:30, reminder at 20:30, missed only at `releasedAt + window`; edge case advice on an already-confirmed unsure dose → flag resolved, dose unchanged; `giveAdvice` on a resolved flag throws; invariants 1–13 hold after each scenario
+
+### Implementation for User Story 6
+
+- [ ] T057 [US6] Create `frontend/src/domain/advice.ts` with `heldDose(state, flag)` (`// FR-008, FR-009`): for an `open` flag with reason `duplicate` or `unsure`, the first dose of the same medication with `dueAt` after the flagged dose's `dueAt` (it may not exist yet), else `null`; and `isHeldDose(state, doseId)` = some open flag's `heldDose` is this dose (R11: only the next dose is held)
+- [ ] T058 [US6] Update `tick` in `frontend/src/domain/clock.ts`: when a `scheduled` dose reaches `dueAt` and `isHeldDose` is true, snapshot settings and set status `held` with no `reminderShownAt`; missed flagging stays limited to `due` doses, so `held` and `skipped` never get one (FR-008, FR-009, invariant 10); `nextEvent` skips held and skipped doses
+- [ ] T059 [US6] Implement `giveAdvice(state, flagId, option)` and `acknowledgeAdvice(state, adviceId)` in `frontend/src/domain/advice.ts` (`// FR-025, FR-026, FR-027`): throw if the flag is not `open`; add `Advice { id: "advice:" + flagId, givenAt: clock, acknowledged: false }`; set flag `resolved` / `resolvedAt`; compute `heldDose` before resolving; `skipNextDose` → that dose (held or still `scheduled`) becomes `skipped`; any other option → if that dose is `held` and no other open flag holds it: `dueAt <= clock` → `due` with `releasedAt = clock` and `reminderShownAt = clock`, else `scheduled` (R13). Never remove alerts or flags
+- [ ] T060 [US6] Implement `respondToLateCheck(state, doseId, choice: "ask" | "alreadyTook")` in `frontend/src/domain/advice.ts` (`// FR-015`): throw unless the dose is `missed`, high-risk and its missed flag is `open`; `alreadyTook` → `confirmDose` (taken late); both → set `adviceRequestedAt = clock` and `takenBeforeRequest` on the missed flag and, only if it was not already requested, add one alert `{ id: "alert:" + flagId + ":adviceRequest", recipient: "nguyen", urgency: "urgent", contentLevel: "full", kind: "adviceRequest", createdAt: clock, read: false }` (R14). Never alert `rachel` (invariant 13)
+- [ ] T061 [US6] Update `frontend/src/domain/views.ts` per contracts: `statusLabelForHarold` adds `held` → "Waiting for Dr. Nguyen's advice" and `skipped` → "Skipped (Dr. Nguyen's advice)"; `statusLabelForRachel` adds `held` → "On hold", `skipped` → "Skipped"; `haroldView` cards add `waitingForAdvice` (an open flag on the medication: "Please wait for Dr. Nguyen's advice before taking another." for unsure/duplicate, "Please wait for Dr. Nguyen's advice before taking it." after "Ask Dr. Nguyen"), replacing the V1 "Please wait before taking another. Dr. Nguyen has been told. / It has been noted." text (FR-008, FR-028); `onHold`; unacknowledged advice as "Dr. Nguyen: <ADVICE_TEXT>" on the card and in a notices list; no `confirmTargetId` or reminder for a `held` or `skipped` dose; `needsLateCheck` only while the missed flag is `open` (FR-027); `nguyenView` adds `openFlags` (medication, reason, dose time, risk, dose record, advice request with "already taken: yes/no") for every open flag of any risk (FR-024) and shows resolved flags with their advice and time in the dose log; `alertViews` renders `adviceRequest` alerts as "<medication> — advice requested — due HH:MM (already taken: yes/no)"
+- [ ] T062 [P] [US6] Create `frontend/src/components/AdvicePanel.tsx` ("Flags awaiting advice"): one row per `openFlags` item with medication, reason, dose time, risk and record, "Harold asked for advice (already taken: yes/no)" when requested, and four large buttons **Take it now**, **Skip your next dose**, **Take your next dose as usual**, **Please call me** (FR-024, FR-025)
+- [ ] T063 [P] [US6] Rewrite `frontend/src/components/LateDoseDialog.tsx`: message "This dose is late. Ask Dr. Nguyen before taking it." with no dosing advice, buttons **Ask Dr. Nguyen** / **I already took it** / **Go back** (FR-015, FR-028)
+- [ ] T064 [US6] Update `frontend/src/components/MedicationCard.tsx`: show the `waitingForAdvice` message as the card's only instruction, the held / skipped status, and the "Dr. Nguyen: …" advice with an **OK** button; after OK the advice stays in the card's flag history as "resolved" (FR-026, FR-027; contracts/ui-views.md)
+- [ ] T065 [US6] Add `RESPOND_LATE_CHECK`, `GIVE_ADVICE` and `ACKNOWLEDGE_ADVICE` actions to `frontend/src/state/store.tsx`; in `frontend/src/views/HaroldView.tsx` wire the new LateDoseDialog buttons to `RESPOND_LATE_CHECK` (`"ask"` / `"alreadyTook"`), show advice notices with OK (`ACKNOWLEDGE_ADVICE`), and confirm directly when `needsLateCheck` is false (FR-027)
+- [ ] T066 [US6] Render `AdvicePanel` in `frontend/src/views/NguyenView.tsx` above the dose log, dispatching `GIVE_ADVICE`; show resolved flags with "Dr. Nguyen: <advice> at HH:MM" in the dose log; check that `RachelView.tsx` shows "On hold" / "Skipped" for shared medications and never the advice (C2)
+
+**Checkpoint**: Quickstart section F (steps 21–27) and the updated steps 7, 12, 13, 15a pass; all domain tests pass.
+
+---
+
+## Phase 11: V2 Polish, Deploy and Tag
+
+- [ ] T067 [P] Update `docs/traceability.md` for V2: retitle "Prototype V1 and V2"; rows for revised FR-008, FR-009, FR-015 and new FR-024–FR-028 with evidence and goals copied from spec.md (G-18, G-19, G-20), code in `advice.ts` / `AdvicePanel.tsx` / `LateDoseDialog.tsx` and tests in `us6-advice.test.ts`; note FR-023 as retired; V2 status column "To evaluate" for the team. Do not edit `docs/learning-log.md` (team-authored)
+- [ ] T068 [P] Update the summary in `README.md` to name the V2 goals (G-18, G-19, G-20: Dr. Nguyen's advice resolves flagged doses); keep the V1 links and TODOs as they are
+- [ ] T069 Run `npm test` and `npm run build` in `frontend/`; check Harold's new texts and dialog against SC-006 and the ui-views wording rules (≥ 24 px text, ≥ 64 px buttons, no app dosing advice)
+- [ ] T070 Walk through all of `specs/001-dose-safety-alerts/quickstart.md` locally (A–F, steps 1–27) and record failures as implementation defects or requirements issues for the V2 evaluation
+- [ ] T071 Deploy V2 as a separate static site (V1 URL stays live; research R9) and replace the "Prototype V2 URL" `TODO` in `README.md`
+- [ ] T072 Walk through `quickstart.md` against the deployed V2 URL; fix and redeploy if any step fails
+- [ ] T073 Tag `v2` (`git tag v2 && git push origin v2`) and replace the "GitHub Version 2" `TODO` in `README.md` with the link to the tag
 
 ---
 
@@ -200,12 +266,16 @@ own.
 - **US4 (Phase 6)**: depends on Foundational and on `confirmDose` (T017) and `AlertList` (T025).
 - **US5 (Phase 7)**: depends on Foundational and on `AlertList` (T025).
 - **Polish (Phase 8)**: after the stories to be shipped in V1.
+- **V2 Foundational (Phase 9)**: after T047–T050 (V1 deployed and tagged); blocks US6.
+- **US6 (Phase 10)**: depends on Phase 9 and on V1 US2 (`resolveDuplicateChoice`, `markUnsure`), US3 (`nguyenView`) and US4 (`confirmDose` taken late, LateDoseDialog).
+- **V2 Polish (Phase 11)**: after US6; T071–T073 in order.
 
 ### Story completion order
 
 ```text
-Setup → Foundational → US1 (MVP) → US2 → { US3, US4 } → US5 → Polish
+Setup → Foundational → US1 (MVP) → US2 → { US3, US4 } → US5 → Polish → V1 tag
                                   └──── US3 can start right after Foundational
+V1 tag → V2 Foundational → US6 → V2 Polish → V2 tag
 ```
 
 ### Within each story
@@ -213,6 +283,7 @@ Setup → Foundational → US1 (MVP) → US2 → { US3, US4 } → US5 → Polish
 - Write the story's test file first and see it fail, then implement domain functions, then UI.
 - Domain (`frontend/src/domain/`) before store actions before views.
 - Shared files touched by several stories, worked on in order: `doses.ts` (T008 → T017 → T022/T023 → T033), `alerts.ts` (T010 → T025 → T038), `clock.ts` (T009 → T032), `HaroldView.tsx` (T020 → T026 → T035 → T040), `store.tsx` (T011 → T020 → T026 → T030 → T040).
+- V2 shared files: `advice.ts` (T057 → T059 → T060), `views.ts` (T061 after T057), `store.tsx` (T053 → T065), `helpers.ts` (T055 before T056).
 
 ### Parallel Opportunities
 
@@ -231,6 +302,15 @@ Task: "T021 Write frontend/tests/domain/us2-unsure-duplicate.test.ts"
 Task: "T024 Create frontend/src/components/ConfirmDuplicateDialog.tsx"
 Task: "T025 Create frontend/src/components/AlertList.tsx"
 # Then sequentially: T022 → T023 → T026
+```
+
+## Parallel Example: User Story 6
+
+```bash
+# After T055–T056:
+Task: "T062 Create frontend/src/components/AdvicePanel.tsx"
+Task: "T063 Rewrite frontend/src/components/LateDoseDialog.tsx"
+# Then sequentially: T057 → T058 → T059 → T060 → T061 → T064 → T065 → T066
 ```
 
 ## Parallel Example: User Story 5
@@ -258,6 +338,7 @@ Task: "T039 Create frontend/src/components/SharingSettings.tsx"
 3. US3 + US4 → windows, risk levels and urgency-based alerts (C1, C3).
 4. US5 → Rachel's consent tiers (C2).
 5. Polish → traceability matrix, README, build, local walkthrough, deploy, walkthrough on the deployed URL, then tag `v1`.
+6. V2 → Phase 9, US6, then V2 polish, deploy and tag `v2`. Stop and check after US6: quickstart section F and `npm test`.
 
 ---
 
@@ -267,4 +348,6 @@ Task: "T039 Create frontend/src/components/SharingSettings.tsx"
 - Keep every rule inside `frontend/src/domain/`; components must not compute flags or routing.
 - The in-app safety-contact toggle stands in for consent for the demo only; the C2 open question
   stays open (Constitution III).
-- Commit after each task or logical group; do not tag `v1` (T050) until T045–T049 are done.
+- Commit after each task or logical group; do not tag `v1` (T050) until T045–T049 are done, or
+  `v2` (T073) until T069–T072 are done.
+- V2: the "if Dr. Nguyen doesn't answer" question stays open; holds simply stay until advice.

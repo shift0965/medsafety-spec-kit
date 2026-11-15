@@ -13,7 +13,7 @@ simulated-clock times (R3).
 |---|---|---|
 | id | `"harold" \| "rachel" \| "nguyen"` | Fixed roles for the prototype |
 | displayName | string | "Harold", "Rachel", "Dr. Nguyen" |
-| role | `"patient" \| "family" \| "prescriber"` | |
+| role | `"patient" \| "family" \| "pharmacist"` | Dr. Nguyen is Harold's community pharmacist (T3:4) |
 
 ### Medication (G-38, G-33)
 
@@ -23,7 +23,7 @@ simulated-clock times (R3).
 | name | string | e.g. "Warfarin" |
 | scheduleTimes | `"HH:MM"[]` | at least one due time per day |
 | windowMinutes | number \| null | 5–240 when set; `null` → default 60 (FR-011) |
-| riskLevel | `"high" \| "low"` \| null | `null` → default `"low"` (FR-011) |
+| riskLevel | `"high" \| "low"` \| null | `null` → default `"high"` (FR-011) |
 | sharedWithRachel | boolean | default `false` (FR-019, FR-022) |
 
 Derived: `effectiveWindow`, `effectiveRisk`, `usesDefaults` (shown in Dr. Nguyen's view, FR-011).
@@ -92,17 +92,23 @@ Alerts are never deleted or withdrawn (FR-015).
 ```text
             reminder shown at dueAt (once)
  scheduled ───────────────────────────────▶ due
-    │  confirm before dueAt                  │
+    │  confirm before dueAt (early dose)     │
     ▼                                        ├── confirm (inside window) ──────▶ taken
   taken                                      ├── "I'm not sure" ───────────────▶ unsure      [flag: unsure]
                                              └── now ≥ windowClosesAt ────────▶ missed      [flag: missed]
- taken  ── confirm again + explicit yes ──────────────────────────────────────▶ duplicate   [flag: duplicate]
- taken  ── confirm again + cancel ────────────────────────────────────────────▶ taken (no change)
+ taken  ── confirm again + "Yes, I took another" ────────────────────────────▶ duplicate   [flag: duplicate]
+ taken  ── confirm again + "No, I tapped by mistake" ────────────────────────▶ taken (no change)
+ taken  ── confirm again + "I'm not sure" ───────────────────────────────────▶ unsure      [flag: unsure]
  unsure ── confirm ───────────────────────────────────────────────────────────▶ taken      (unsure flag kept)
- missed ── confirm ───────────────────────────────────────────────────────────▶ takenLate  (missed flag kept, note added)
+ missed ── confirm ───────────────────────────────────────────────────────────▶ takenLate  (missed flag kept, note added;
+                                                                                   high risk: "Check with Dr. Nguyen" shown first)
 ```
 
 `DoseStatus = "scheduled" | "due" | "taken" | "takenLate" | "unsure" | "missed" | "duplicate"`
+
+**Early dose** (spec edge case, T1:30, T1:32): confirming before `dueAt` applies to the *next*
+due dose of that medication that has no confirmation (for twice-daily medications, the next of the
+two); that dose never shows a reminder.
 
 ## Rules (validation and routing)
 
@@ -113,7 +119,7 @@ Alerts are never deleted or withdrawn (FR-015).
 | Unsure and duplicate flags raised at the moment of the action | FR-013 |
 | High-risk flag → urgent alerts to Harold and Dr. Nguyen, `contentLevel: full` | FR-016 |
 | High-risk flag and `rachelIsSafetyContact` → urgent alert to Rachel, `contentLevel: checkInOnly` | FR-021 |
-| Low-risk flag → routine notice to Harold only | FR-017, FR-023 |
+| Low-risk flag → routine notice to Harold only | FR-017 |
 | Rachel's view lists only medications with `sharedWithRachel` (name, due time, status) | FR-019, FR-022 |
 | Rachel's view never shows flag reason or details of unshared medications | FR-019, FR-021 |
 
@@ -124,6 +130,6 @@ Alerts are never deleted or withdrawn (FR-015).
 | Warfarin | 08:00 | 60 | high | no |
 | Atorvastatin | 20:00 | 120 | low | no |
 | Levothyroxine | 07:00 | 30 | low | no |
-| Metoprolol | 08:00, 20:00 | not set (default) | not set (default) | no |
+| Metoprolol | 08:00, 20:00 | not set (default 60) | not set (default high) | no |
 
 Demo clock starts at 06:45 on the current day (before the first due dose, so no window has closed yet). Rachel is not a safety contact.

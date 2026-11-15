@@ -36,37 +36,45 @@ Each step lists the spec scenario it proves. Record results in `docs/traceabilit
 ### B. Unsure and duplicate (US2)
 
 4. Tap **I took it** on Warfarin again. Dialog shows "You recorded this at 08:00". Tap
-   **No, go back** → no flag. → US2-2, US2-4
+   **No, I tapped by mistake** → no flag. → US2-2, US2-4
 5. Repeat, tap **Yes, I took another** → duplicate flag; urgent alert in Harold's and
    Dr. Nguyen's views. → US2-3, US4-4
-6. Reset. Advance to 07:00, tap **I'm not sure** on Levothyroxine → last-taken shown and "please
+6. Tap **I took it** on Metoprolol, then tap it again and choose **I'm not sure** → dose marked
+   unsure and flagged immediately (Metoprolol uses the default high risk, so urgent alerts). → US2-5
+7. Reset. Advance to 07:00, tap **I'm not sure** on Levothyroxine → last-taken shown and "please
    wait" advice; routine notice only (low risk). → US2-1, US4-3
 
 ### C. Settings (US3)
 
-7. In Dr. Nguyen's view, Metoprolol shows a "default" badge (60 min, low). → US3-3
-8. Set Levothyroxine to 30 min / low and Warfarin to high; values are saved and shown. → US3-1,
+8. In Dr. Nguyen's view, Metoprolol shows a "default" badge (60 min, high). → US3-3
+9. Set Levothyroxine to 30 min / low and Warfarin to high; values are saved and shown. → US3-1,
    US3-2
 
 ### D. Windows and urgency (US4)
 
-9. Reset. Advance to 08:30 without confirming Warfarin: no Warfarin flag and no urgent alerts.
+10. Reset. Advance to 08:30 without confirming Warfarin: no Warfarin flag and no urgent alerts.
    (Levothyroxine's window closed at 07:30, so one low-risk routine notice to Harold is expected
    and also confirms US4-3.) → US4-1
-10. Advance to 09:00: Warfarin flagged missed; urgent alerts for Harold and Dr. Nguyen; nothing
-    for Rachel. → US4-2
-11. Tap **I took it** at 09:15: status "taken late 09:15"; flag and alerts still present. → US4-5
-12. Advance to 22:00 without confirming Atorvastatin: routine notice to Harold only. → US4-3
+11. Advance to 09:00: Warfarin flagged missed; urgent alerts for Harold and Dr. Nguyen; nothing
+    for Rachel. (Metoprolol, default high risk, is also flagged missed with urgent alerts.) → US4-2
+12. Advance to 09:15 and tap **I took it** on Warfarin: "Check with Dr. Nguyen about this late
+    dose" appears first, with no dosing advice. → US4-5
+13. Tap **Record that I took it**: status "taken late 09:15"; flag and alerts still present. → US4-6
+14. Advance to 22:00 without confirming Atorvastatin: routine notice to Harold only. → US4-3
+15. Reset. At 18:00 tap **I took it** on Atorvastatin (early dose). Advance to 20:00: no
+    reminder for Atorvastatin; last taken shows 18:00. → edge case "dose confirmed before due time"
 
 ### E. Rachel's access (US5)
 
-13. Reset. Open Rachel's view: "Harold hasn't shared anything with you." → US5-1
-14. In Harold's view turn on **Rachel is my safety contact**. Repeat step 10: Rachel gets
-    "Please check in with Harold." with no medication details. → US5-2
-15. Share Atorvastatin only. Rachel's view shows Atorvastatin name, due time, status; nothing
+16. Reset. Open Rachel's view: "Harold hasn't shared anything with you." → US5-1
+17. In Harold's view turn on **Rachel is my safety contact**. Advance to 09:00 (as in step 11):
+    Rachel gets "Please check in with Harold." with no medication details. → US5-2
+18. Share Atorvastatin only. Rachel's view shows Atorvastatin name, due time, status; nothing
     else. → US5-3
-16. Repeat step 12: Rachel sees "missed" status on Atorvastatin but no alert. → US5-4
-17. Turn off safety contact; repeat step 10: Rachel receives nothing. → US5-5
+19. Turn off safety contact. Advance to 21:00 so Metoprolol's 20:00 dose (default high risk) is
+    flagged missed: Rachel receives no new message. → US5-5
+20. Advance to 22:00 (as in step 14): Rachel sees "missed" status on Atorvastatin but no
+    alert. → US5-4
 
 ## Expected automated checks
 

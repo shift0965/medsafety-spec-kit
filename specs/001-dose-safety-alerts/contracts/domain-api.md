@@ -12,10 +12,10 @@ current `AppState` and returns a new `AppState` (no mutation, no reading the dev
 | Function | Input | Effect | Errors / no-ops | FR |
 |---|---|---|---|---|
 | `tick(state, now)` | new simulated time | Sets clock; creates today's doses; marks doses `due` and sets `reminderShownAt` once at `dueAt`; raises `missed` flags (and their alerts) for doses whose window closed | `now` earlier than clock → no-op | FR-001, FR-012, FR-014, FR-016, FR-017, FR-021 |
-| `confirmDose(state, doseId)` | dose | If no confirmation: records time, status `taken` (or `takenLate` if missed; keeps unsure flag). If already confirmed: returns state unchanged plus `needsDuplicateConfirm: true` | unknown dose → error | FR-002, FR-003, FR-004, FR-009, FR-015 |
-| `confirmDuplicate(state, doseId)` | dose already taken | Adds second confirmation, status `duplicate`, raises `duplicate` flag + alerts | dose not taken → error | FR-009, FR-013 |
-| `markUnsure(state, doseId)` | due dose | Sets `unsureAt`, status `unsure`, raises `unsure` flag + alerts | dose already taken → error (use confirm path) | FR-007, FR-008, FR-013 |
-| `setMedicationSettings(state, medId, {windowMinutes, riskLevel})` | Dr. Nguyen input | Updates medication; future doses use new values; pending doses unchanged | window outside 5–240 → error | FR-010, FR-011 |
+| `confirmDose(state, doseId)` | dose (scheduled, due, unsure or missed) | If no confirmation: records time, status `taken` (or `takenLate` if missed, adding the note "taken late at HH:MM" to the missed flag; keeps unsure flag). A `scheduled` dose confirmed before `dueAt` is an early dose: status `taken`, no reminder later. If already confirmed: returns state unchanged plus `needsDuplicateChoice: true` | unknown dose → error | FR-002, FR-003, FR-004, FR-009, FR-015 |
+| `resolveDuplicateChoice(state, doseId, choice)` | dose already taken; `choice: "tookAnother" \| "mistake" \| "unsure"` | `tookAnother` → adds second confirmation, status `duplicate`, raises `duplicate` flag + alerts; `mistake` → no change; `unsure` → same effect as `markUnsure` | dose not taken → error | FR-009, FR-013 |
+| `markUnsure(state, doseId)` | due or taken dose | Sets `unsureAt`, status `unsure`, raises `unsure` flag + alerts (keeps existing confirmations) | dose already unsure → no-op | FR-007, FR-008, FR-013 |
+| `setMedicationSettings(state, medId, {windowMinutes, riskLevel})` | Dr. Nguyen (pharmacist) input | Updates medication; future doses use new values; pending doses unchanged | window outside 5–240 → error | FR-010, FR-011 |
 | `setSafetyContact(state, enabled)` | Harold input | Sets `consent.rachelIsSafetyContact` | — | FR-020 |
 | `setShared(state, medId, shared)` | Harold input | Sets `sharedWithRachel` | — | FR-022 |
 | `markAlertRead(state, alertId)` | recipient | Sets `read` | — | — |
@@ -26,9 +26,9 @@ current `AppState` and returns a new `AppState` (no mutation, no reading the dev
 | Function | Returns | FR |
 |---|---|---|
 | `lastTakenAt(state, medId)` | latest confirmation time or `null` | FR-005 |
-| `haroldView(state)` | medication cards (name, next/current dose, status, last taken, reminder?), routine notices, urgent alerts | FR-001–FR-008, FR-017 |
+| `haroldView(state)` | medication cards (name, next/current dose, status, last taken, reminder?, `needsLateCheck` when the dose is missed and high-risk), routine notices, urgent alerts | FR-001–FR-008, FR-015, FR-017 |
 | `nguyenView(state)` | all medications with effective window/risk and `usesDefaults`; urgent alerts with full details | FR-010, FR-011, FR-016, FR-018 |
-| `rachelView(state)` | shared medications only (name, due time, status); her alerts (`checkInOnly` content); `nothingShared` flag | FR-019, FR-021, FR-022, FR-023 |
+| `rachelView(state)` | shared medications only (name, due time, status); her alerts (`checkInOnly` content); `nothingShared` flag | FR-019, FR-021, FR-022 |
 
 ## Alert routing (internal, `routeFlag(state, flag)`)
 
@@ -43,7 +43,7 @@ flag.riskLevel = low  → routine/full → Harold only
 1. No flag exists for a dose with `now < windowClosesAt` unless its reason is `unsure` or
    `duplicate` (FR-014).
 2. Every high-risk flag has exactly one urgent alert for Harold and one for Dr. Nguyen (FR-016).
-3. No alert for Dr. Nguyen or Rachel exists for a low-risk flag (FR-017, FR-023).
+3. No alert for Dr. Nguyen or Rachel exists for a low-risk flag (FR-017).
 4. Every alert to Rachel has `contentLevel: checkInOnly` (FR-021).
 5. `rachelView` never includes a medication with `sharedWithRachel = false` (FR-019, FR-022).
 6. `reminderShownAt` is set at most once per dose (FR-001).

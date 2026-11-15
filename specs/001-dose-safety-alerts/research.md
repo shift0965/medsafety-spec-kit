@@ -46,7 +46,7 @@ Context and the constitution's prototype constraints (Principle V).
 - **Decision**: Put all rules (dose status, flagging, alert routing, consent filtering) in pure
   TypeScript functions in `frontend/src/domain/`, independent of React. Views only call these
   functions and render the result.
-- **Rationale**: The rules are the requirement-critical part (FR-007–FR-023). Pure functions can
+- **Rationale**: The rules are the requirement-critical part (FR-007–FR-022). Pure functions can
   be unit-tested against each acceptance scenario and named with their FR IDs (Constitution I).
 - **Alternatives considered**: Logic inside components (hard to test and trace).
 

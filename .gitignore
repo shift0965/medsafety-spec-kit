@@ -1,3 +1,7 @@
 17626 HW 3 Spec-Driven Development.pdf
 L3_goal_modeling_notes.md
 .DS_Store
+node_modules/
+frontend/dist/
+*.log
+.env*

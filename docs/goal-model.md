@@ -40,7 +40,7 @@
 
 ## 2. Sprint Goal Model
 
-Parallelogram = goal, hexagon = agent. "complete" = complete AND-refinement, "partial" = incomplete AND-refinement; separate arrows into one goal are OR-alternatives; grey dashed = rejected; dotted labeled lines = the conflicts and trade-off in §4; blue fill = goals added to the build in V2.
+Parallelogram = goal, hexagon = agent. "complete" = complete AND-refinement, "partial" = incomplete AND-refinement; separate arrows into one goal are OR-alternatives; grey dashed = rejected; dotted labeled lines = the conflicts and trade-off in §4; blue fill = goals added to the build in V2; amber fill = softgoals added for the A4 change requests, with dotted "helps" arrows to the goals they serve (§7).
 
 ```mermaid
 flowchart BT
@@ -71,6 +71,10 @@ flowchart BT
   G34[/"G-34: Avoid RachelAlerted If SlightlyLate"/]
   G35[/"G-35: Maximize Readability (soft)"/]
   G36[/"G-36: LargeTextAndButtons"/]
+  G44[/"G-44: Minimize DrNguyenEffortToAnswerFlags (soft)"/]
+  G45[/"G-45: Minimize TimeHaroldWaitsForAdvice (soft)"/]
+  G46[/"G-46: Minimize WrongAnswerInSafetyPrompt (soft)"/]
+  G47[/"G-47: Maximize RecordDurabilityVisible (soft)"/]
 
   %% Refinements
   R1(("partial")) --> G1
@@ -147,10 +151,22 @@ flowchart BT
   G24 -. "conflict C2" .- G30
   G22 -. "trade-off" .- G31
 
+  %% A4: softgoals from change request packet C11 (see §7)
+  G44 -. "helps" .-> G19
+  G45 -. "helps" .-> G18
+  G46 -. "helps" .-> G16
+  G46 -. "helps" .-> G22
+  G47 -. "helps" .-> G8
+  G47 -. "helps" .-> G16
+  G45 -. "conflict C2 (A4-CR-2)" .- G30
+  G45 -. "trade-off (A4-CR-2)" .- G20
+
   classDef rejected stroke-dasharray: 5 5,color:#888,stroke:#888
   class G26,R7 rejected
   classDef v2 fill:#dbeafe,stroke:#1d4ed8
   class G18,G19,G20 v2
+  classDef a4 fill:#fef3c7,stroke:#b45309
+  class G44,G45,G46,G47 a4
 ```
 
 ## 3. Overlaps
@@ -219,3 +235,25 @@ flowchart BT
   and Harold waits until then (G-20).
 - **Open question:** if Dr. Nguyen doesn't answer, Harold keeps waiting (G-20). What should happen?
   The C2 consent question also stays open.
+
+## 7. A4 Change Requests (packet C11)
+
+Four non-functional change requests arrived after stakeholders used V2. None of the V2 softgoals
+(G-31, G-35) covered them, so each gets a softgoal. Full analysis: [`a4/analysis.md`](a4/analysis.md).
+
+| ID | Softgoal | Helps | Request | Status |
+| --- | --- | --- | --- | --- |
+| G-44 | **Minimize** DrNguyenEffortToAnswerFlags | G-19 | A4-CR-1 (Dr. Nguyen: answered entries come back) | Backlog |
+| G-45 | **Minimize** TimeHaroldWaitsForAdvice | G-18 | A4-CR-2 (Rachel: held dose, nobody told) | **Selected for A4** |
+| G-46 | **Minimize** WrongAnswerInSafetyPrompt | G-16, G-22 | A4-CR-3 (Harold: duplicate prompt hard to read) | Backlog |
+| G-47 | **Maximize** RecordDurabilityVisible | G-8, G-16 | A4-CR-4 (Harold: record not kept, page looks settled) | Backlog |
+
+**Conflicts.** No two of the four requests conflict (analysis, comparison of requests). G-45
+pulls against two existing decisions, and both decisions stand:
+
+- **G-45 vs. G-30 (C2):** telling Rachel that Harold is still waiting must not reveal the medication
+  or reason. Consent stays a hard constraint, so Rachel gets only the check-in message, and only
+  as safety contact (FR-021).
+- **G-45 vs. G-20:** the time limit tells people Harold is waiting. It never lifts the hold or
+  gives dosing advice; only Dr. Nguyen's advice does (FR-027, FR-028). The V2 open question in §6
+  ("if Dr. Nguyen doesn't answer") is answered by notifying, not by releasing the dose.

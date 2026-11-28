@@ -3,8 +3,8 @@
 Packet C11, four requests. We analyzed Prototype V2 (tag `v2`, commit `362ae19`) against
 [`spec.md`](../../specs/001-dose-safety-alerts/spec.md), the [RTM](../traceability.md) and the
 [goal model](../goal-model.md). Code paths are relative to `frontend/src/`, tests are in
-`frontend/tests/domain/`. We reproduced CR-1 and CR-2 in V2 using Reset demo and the demo clock.
-CR-4 is based on reading the code, and we still need to confirm it in the browser.
+`frontend/tests/domain/`. We reproduced CR-1 and CR-2 in V2 using Reset demo and the demo clock,
+and CR-4 in Chromium against the V2 build.
 
 New softgoals, added to the goal model (§7): **G-44** Minimize DrNguyenEffortToAnswerFlags,
 **G-45** Minimize TimeHaroldWaitsForAdvice, **G-46** Minimize WrongAnswerInSafetyPrompt,
@@ -60,7 +60,7 @@ New softgoals, added to the goal model (§7): **G-44** Minimize DrNguyenEffortTo
 | --- | --- |
 | Quality and softgoal | Reliability (data integrity) and visibility of system status. New softgoal G-47, which helps G-8 and G-16. |
 | Obstacle | The save fails, but the card still shows "Taken". Reopening the page brings back the old state, along with the reminder. In `store.tsx` the failed save is ignored ("the demo still works without persistence"), and a failed load resets to the seed data. |
-| Likelihood | **Low.** With storage working, a reload keeps the record. It needs blocked, full or cleared storage, or a second open tab overwriting the first, and no interview mentions any of these. *To confirm in the browser.* If the two-tab case is easy to hit, we'll raise it to Medium. |
+| Likelihood | **Low.** With storage working, a reload keeps the record (checked). We reproduced the obstacle two ways. (1) Make the save fail (we made `localStorage.setItem` throw), then confirm Warfarin at 08:00: the card says "Taken at 08:00" with no warning, and after a reload it says "Due at 08:00" with the reminder back. (2) With the app open in a second tab, confirm in tab A, then click "+5 min" in tab B: the stale tab B saves over the record, and reloading tab A shows the reminder again. Both need conditions we haven't seen in use, and no interview mentions them, so this stays Low. |
 | Criticality | **Major.** Harold is reminded about a dose he already took, and the FR-009 check can't catch it because the earlier record is gone (G-16, T2:14). |
 | Classification | **Change of intent.** FR-004 ("store the time each dose is confirmed") is met in the app, and keeping the record across a reload is a plan decision (research R2), not a spec requirement. Nothing asks the app to warn Harold. *Open for the team:* if "store" means "keep durably", this is a defect instead. |
 | Affected artifacts | FR-004, FR-005, FR-001/002, SC-001, research R2, plan *Storage*; `store.tsx`, `MedicationCard.tsx`, `HaroldView.tsx`. No tests (the tests are domain-only). RTM rows FR-004/005. |
